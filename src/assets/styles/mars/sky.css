@@ -1,0 +1,48 @@
+.sky-panel .sky-toolbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin:15px 20px 0; color:var(--muted); font-size:11px; }
+.sky-toolbar i { font-style:normal; margin:0 7px; opacity:.5; }
+.sky-toolbar #sky-status { color:#a55335; font-weight:600; }
+.sky-panel .sky-stage { background:linear-gradient(180deg,rgba(5,8,17,.05),rgba(5,8,17,.12)),url('../../images/venus/milky-way-2mass.jpg') center / cover no-repeat,#090e1b; margin-top:12px; }
+.sky-panel .sky-stage svg { width:100%; height:auto; aspect-ratio:12/5; }
+.sky-panel .skytext { font-size:11px; stroke:#090e1b; stroke-width:3px; }
+#sky-full-path { fill:none; stroke:#d8e7ed; stroke-width:1.6; stroke-dasharray:3 5; }
+#sky-reference-path { fill:none; stroke:#d8e7ed; stroke-width:1; opacity:.18; }
+#sky-directions path { fill:none; stroke-width:1.7; stroke-linejoin:round; }
+#sky-endpoints circle { fill:#101521; stroke:#c8dfeb; stroke-width:1.3; }
+.sky-panel .sky-endpoint-label { font-size:9px; }
+.sky-loop-control { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--muted); cursor:pointer; }
+.sky-loop-control input { accent-color:var(--gold); }
+#sky-retro-path { fill:none; stroke:#ffbd85; stroke-width:2.3; }
+#sky-waypoints circle { fill:#0c1522; stroke:#ecd6bf; stroke-width:1.3; }
+.sky-map-footer { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:0 14px 12px; color:#d9dde7; font-size:10px; text-shadow:0 1px 3px #000; }
+.sky-map-footer small { font-size:9px; color:#b9bcc7; }
+.sky-legend { display:inline-block; width:14px; border-top:1.5px dashed #d8e7ed; vertical-align:middle; margin:0 5px 0 0; }
+.sky-legend.retro { border-top:2px solid #ffbd85; margin-left:12px; }
+.sky-playback { display:flex; flex-wrap:wrap; gap:9px; align-items:center; padding:15px 20px 8px; }
+.sky-sync-note { gap:10px; padding-bottom:14px; border-bottom:1px solid var(--line); background:rgba(183,95,64,.035); }
+.sky-sync-note>span { display:grid; width:25px; height:25px; place-items:center; border:1px solid rgba(183,95,64,.35); border-radius:50%; color:#a55335; }
+.sky-sync-note p { flex:1; min-width:190px; margin:0; color:var(--muted); font-size:11px; line-height:1.6; }
+.sky-sync-note #sky-date { margin-left:auto; color:#a55335; font:11px var(--mono); white-space:nowrap; }
+.sky-playback button,.sky-milestones button { border:1px solid var(--line-strong); border-radius:7px; background:rgba(255,255,255,.42); color:var(--text); font-size:11px; font-family:inherit; padding:8px 11px; cursor:pointer; }
+.sky-playback #sky-play { color:#a55335; min-width:115px; background:rgba(183,95,64,.08); }
+.sky-playback #sky-date { margin-left:auto; font:11px var(--mono); color:var(--muted); }
+.sky-date-slider { display:block; width:100%; margin-top:4px; }
+.sky-date-slider input { display:block; width:100%; margin:0; accent-color:var(--gold); cursor:ew-resize; }
+.sky-range-labels { display:flex; justify-content:space-between; font:9px var(--mono); color:var(--muted); margin-top:7px; }
+.sky-milestones { display:flex; flex-wrap:wrap; gap:7px; padding:5px 20px 16px; }
+.sky-milestones button { font-size:10px; color:var(--muted); padding:6px 9px; }
+.sky-milestones button.active { border-color:var(--gold); color:#a55335; }
+.sky-caption p { margin:8px 0 0; }
+.sky-caption summary { cursor:pointer; margin-top:9px; color:var(--gold); font-size:11px; }
+.sky-sr-only { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+.sky-window-note { margin:0 14px 12px; padding:10px 12px; border:1px solid #ffffff30; border-radius:8px; background:#101521dd; color:#efe2d2; font-size:12px; line-height:1.6; }
+@media(max-width:560px) {
+  .sky-panel .heading { flex-wrap:wrap; gap:10px; }
+  .sky-panel .sky-stage { margin-left:10px; margin-right:10px; }
+  .sky-panel .sky-toolbar { margin-left:14px; margin-right:14px; font-size:10px; }
+  .sky-panel .sky-stage svg { aspect-ratio:12/5; }
+  .sky-panel .skytext { font-size:20px; stroke-width:4px; }
+  .sky-map-footer { flex-wrap:wrap; padding:0 10px 10px; gap:7px; }
+  .sky-playback { padding-left:14px; padding-right:14px; }
+  .sky-milestones { padding-left:14px; padding-right:14px; }
+  .sky-panel .sky-caption { margin-left:14px; margin-right:14px; }
+}
