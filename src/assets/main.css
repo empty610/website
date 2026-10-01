@@ -1,0 +1,781 @@
+/* 本地的 ITC Avant Garde Gothic Pro 多字重 */
+@font-face {
+  font-family: "Avant Garde";
+  src: url("fonts/ITCAvantGardePro-Book.woff2") format("woff2");
+  font-weight: 300 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Avant Garde";
+  src: url("fonts/ITCAvantGardePro-Demi.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Avant Garde";
+  src: url("fonts/ITCAvantGardePro-Bold.woff2") format("woff2");
+  font-weight: 700 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 斜体（可选，仅在用到 font-style: italic 时生效） */
+@font-face {
+  font-family: "Avant Garde";
+  src: url("fonts/AVGARDDO_2.woff2") format("woff2");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  --board: #f5f0e7;              /* warm cream background */
+  --grid: rgba(0, 0, 0, 0.045);  /* subtle grid lines */
+  --ink: #14120e;                /* near-black text */
+  --ink-soft: rgba(20, 18, 14, 0.6);
+  --grid-size: 96px;
+
+  /* 正文：保持原有风格，仍用 Helvetica 系 */
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* 标题：本地 Avant Garde 优先，缺失时使用系统字体。 */
+  --font-display: "Avant Garde", "ITC Avant Garde Gothic Pro", "Avant Garde Gothic",
+          "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  /* 参考图里的低饱和度三色装饰条（青 -> 金 -> 红） */
+  --accent-gradient: linear-gradient(90deg, #6fd3c7 0%, #f2c14e 45%, #d24b45 100%);
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--ink);
+  overflow-x: hidden;
+
+  /* 整站背景板：米色 + 网格，固定不随滚动移动 */
+  background-color: var(--board);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
+  background-attachment: fixed;
+}
+
+/* 内容容器，铺满可滚动区域 */
+.board { min-height: 100vh; }
+
+/* ---------- Loading screen (fixed overlay) ---------- */
+.loading {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.75s ease, transform 0.75s ease;
+}
+
+.loading.is-done {
+  opacity: 0;
+  transform: scale(1.02);
+  pointer-events: none;
+}
+
+.loading-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.75rem;
+  transform: translateY(4vh);
+}
+
+/* Heavy headline with a soft mirrored reflection */
+.word {
+  margin: 0;
+  font-family: var(--font);
+  font-weight: 900;
+  font-size: clamp(2.75rem, 11vw, 6.5rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  display: block;
+}
+
+.word-face,
+.word-reflection {
+  display: block;
+  text-align: center;
+}
+
+/* The reflection is a vertical mirror that fades out as it drops away. */
+.word-reflection {
+  margin-top: 0.06em;
+  transform: scaleY(-1);
+  transform-origin: center;
+  opacity: 0.3;
+  filter: blur(1.5px);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.22) 38%, rgba(0,0,0,0.5) 72%, rgba(0,0,0,1) 100%);
+          mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.22) 38%, rgba(0,0,0,0.5) 72%, rgba(0,0,0,1) 100%);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ---------- Loading progress ---------- */
+.progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: min(320px, 72vw);
+}
+
+.progress-track {
+  width: 100%;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  width: 0%;
+  height: 100%;
+  background: var(--ink);
+  border-radius: 3px;
+  transition: width 0.1s linear;
+}
+
+.percent {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Main screen (scrollable) ---------- */
+.main {
+  position: relative;
+  z-index: 1;
+  padding-bottom: 8vh;
+  opacity: 0;
+  /* Start the welcome reveal just after the loading screen begins fading. */
+  transition: opacity 0.8s ease 0.2s;
+}
+
+#app.is-ready .main { opacity: 1; }
+
+/* The prerendered homepage remains readable before/without JavaScript. */
+html:not(.js) #loading { display: none; }
+html:not(.js) #main[hidden] { display: block; opacity: 1; }
+
+/* 音乐播放/暂停小按钮（固定右下角） */
+.music-toggle {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 320;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  background: rgba(20, 18, 14, 0.55);
+  backdrop-filter: blur(6px);
+  color: #e9e5dc;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.15s ease;
+}
+
+.music-toggle:hover {
+  background: rgba(20, 18, 14, 0.75);
+  transform: translateY(-2px);
+}
+
+.music-toggle:active { transform: translateY(0); }
+html.music-playing .music-toggle { color: #d9b95a; border-color: rgba(217, 185, 90, 0.35); }
+.music-toggle { transition: opacity .28s ease, background .25s ease, color .25s ease, transform .15s ease; }
+.music-toggle.is-idle-hidden { opacity: 0; pointer-events: none; }
+
+/* 第三面入口与仪表盘返回键共用深色金边面板。 */
+.terminal-close,
+.enter-btn {
+  text-decoration: none;
+  color: #f6f1e8;
+  background: rgba(13, 11, 8, 0.9);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(217, 185, 90, 0.55);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.32);
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, opacity 0.28s ease, transform 0.28s ease;
+}
+
+/* 终端覆盖层右上角的返回按钮 */
+.terminal-close {
+  position: fixed;
+  top: 16px;
+  right: 18px;
+  z-index: 99999;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  min-width: 118px;
+  line-height: 1;
+  padding: 12px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.terminal-close.is-idle-hidden {
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+}
+
+.back-u-turn {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.terminal-close:hover,
+.enter-btn:hover {
+  background: #b89438;
+  color: #0d0b08;
+  border-color: #b89438;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* 终端覆盖层出现时的优雅进入（保持不透明，避免浅色底透出；深色启动界面直接呈现出） */
+.terminal-overlay {
+  animation: terminal-in 0.4s ease;
+}
+
+@keyframes terminal-in {
+  from { transform: scale(1.02); }
+  to   { transform: none; }
+}
+
+/* Scroll 渐变动画（约 0.5s）——只有启用 JS 时才先隐藏，避免无 JS 时内容缺失 */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.js .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* 第三面：透明度由 JS 随滚动位置连续设置（无过渡，跟随滚动 1:1） */
+.js .reveal-fade {
+  opacity: 0;
+}
+
+/* 首屏 WELCOME 随滚动离场时使用更舒缓的 3 秒淡出。 */
+.js .hero.reveal-fade {
+  transition: opacity 3s ease;
+}
+
+/* 三色装饰条 */
+.accent-bar {
+  display: block;
+  height: 6px;
+  width: min(420px, 68vw);
+  border-radius: 999px;
+  background: var(--accent-gradient);
+  margin-top: 1.1rem;
+}
+
+.accent-bar.small {
+  align-self: center;
+  flex: 1;
+  width: auto;
+  min-width: 3rem;
+  height: 4px;
+  margin: 0;
+}
+
+/* ---------- Hero: WELCOME 欢迎 ---------- */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2em;
+  padding: 8vh 5vw;
+  text-align: center;
+}
+
+.hero-title {
+  margin: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: 0.18em;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.3rem, 9.5vw, 8rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+/* ---------- Section: 关于我 ---------- */
+.section {
+  padding: 10vh 6vw;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 2.5rem;
+}
+
+.section-icon {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  /* 渐变描边环（借用三色渐变，米色填充内芯） */
+  background:
+    linear-gradient(var(--board), var(--board)) padding-box,
+    var(--accent-gradient) border-box;
+}
+
+.section-title {
+  margin: 0;
+  flex: none;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: clamp(2rem, 6vw, 4rem);
+  align-items: center;
+}
+
+.about-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1.3rem;
+}
+
+.about-text p {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 1.06rem;
+  line-height: 1.85;
+  color: var(--ink-soft);
+  text-align: justify;
+}
+
+.about-photo {
+  margin: 0;
+  aspect-ratio: 1;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.25);
+}
+
+.about-photo .photo {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* ---------- 联系区 ---------- */
+.contact-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.contact-circle {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(184, 148, 56, 0.55);
+  color: #b89438;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  text-decoration: none;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.18s ease, border-color 0.25s ease;
+}
+
+.contact-circle svg { width: 24px; height: 24px; fill: currentColor; }
+.contact-circle .gmail-icon {
+  width: 27px;
+  height: 27px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.15;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.contact-circle .glyph { line-height: 1; }
+
+.contact-circle:hover {
+  background: #b89438;
+  color: #0d0b08;
+  border-color: #b89438;
+  transform: translateY(-3px);
+}
+
+/* ---------- 第四面：未来呢 ---------- */
+.future {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 14vh 6vw 10vh;
+}
+
+.future-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(3rem, 12vw, 9rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.future-sub {
+  margin: 1.4rem 0 0;
+  font-family: var(--font);
+  font-size: clamp(1rem, 2.4vw, 1.4rem);
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+}
+
+/* ---------- 第三面：lo-fi 底片背景 ---------- */
+.section-3 {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: clamp(72px, 12vh, 150px) 8vw;
+  margin: 0;
+  text-align: center;
+  background-image: url("images/home/backdrop-3.webp");
+  background-size: cover;
+  background-position: center;
+  color: #e9e5dc;
+}
+
+/* 中间淡淡的暗色渐晕，让压在彩色条上的文字更清晰 */
+.section-3::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 62% 55% at 50% 48%, rgba(8, 8, 10, 0.42), rgba(8, 8, 10, 0) 76%);
+}
+
+.section-3-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(28px, 4vh, 48px);
+}
+
+.deloc {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-display); /* Avant Garde */
+  font-weight: 700;
+  font-size: clamp(1.7rem, 8vw, 6.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+
+.deloc-sub {
+  margin: 0;
+  max-width: 48ch;
+  line-height: 1.8;
+  font-family: var(--font-display);
+  font-size: clamp(0.78rem, 1.6vw, 1.05rem);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(233, 229, 220, 0.85);
+}
+
+.section-3 .enter-btn { margin-top: 12px; }
+
+/* 进入按钮：与仪表盘返回键一致的深色金边胶囊面板。 */
+.enter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 3.2rem;
+  padding: 15px 30px;
+  border-radius: 999px;
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+}
+
+.enter-btn .btn-arrow {
+  font-size: 13px;
+  line-height: 1;
+  transform: translateY(-2px);
+}
+
+/* 文字：每次进入时播放一次 1.2s 入场动画；离开后重置以便下次重放 */
+.section-3 .deloc,
+.section-3 .deloc-sub,
+.section-3 .enter-btn {
+  opacity: 0;
+}
+
+.section-3.enter .deloc {
+  animation: deloc-in 1.2s ease forwards;
+}
+
+.section-3.enter .deloc-sub {
+  animation: deloc-in 1.2s ease 0.15s forwards;
+}
+
+.section-3.enter .enter-btn {
+  animation: deloc-in 1.2s ease 0.3s forwards;
+}
+
+@keyframes deloc-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 第一/二/四面文字：与第三面相同的“进入播放一次 + 随滚动淡出” */
+.js .hero .hero-title,
+.js .hero .accent-bar,
+.js .about .section-head,
+.js .about .about-grid,
+.js .future .future-title,
+.js .future .future-sub,
+.js .future .future-body {
+  opacity: 0;
+}
+
+.hero.enter .hero-title,
+.about.enter .section-head,
+.future.enter .future-title {
+  animation: sec-text-in 1.2s ease forwards;
+}
+
+.hero.enter .accent-bar,
+.about.enter .about-grid,
+.future.enter .future-sub {
+  animation: sec-text-in 1.2s ease 0.12s forwards;
+}
+
+@keyframes sec-text-in {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* 第四面：与前面相同的淡进/淡出，但整体比它们晚 0.5s */
+.future {
+  transition: opacity 0.45s ease 0.5s;
+}
+
+.future.enter .future-title {
+  animation: sec-text-in 1.2s ease 0.5s forwards;
+}
+
+.future.enter .future-sub {
+  animation: sec-text-in 1.2s ease 0.62s forwards;
+}
+
+.future.enter .future-body {
+  animation: sec-text-in 1.2s ease 0.74s forwards;
+}
+
+.future-body {
+  max-width: 56ch;
+  margin-top: 1.4rem;
+  font-family: var(--font);
+  font-size: 1.05rem;
+  line-height: 1.9;
+  color: var(--ink-soft);
+  text-align: justify;
+}
+
+/* ---------- DC page hand-off ---------- */
+/* Keep the page visible underneath so the transfer reads as a deliberate hand-off,
+   then let the independent boot screen take over. */
+.dc-page-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  color: #e5c76f;
+  background:
+    radial-gradient(circle at center, rgba(184, 148, 56, 0.16), transparent 30%),
+    rgba(13, 11, 8, 0.98);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.5s ease, visibility 0s linear 0.5s;
+}
+
+.dc-page-transition.is-active {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.5s ease;
+}
+
+.dc-transition-core {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(190px, 52vw);
+  aspect-ratio: 1;
+  isolation: isolate;
+  opacity: 0;
+  transform: scale(0.9) translateZ(0);
+  will-change: opacity, transform;
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(.22, .61, .36, 1);
+}
+
+.dc-page-transition.is-active .dc-transition-core {
+  opacity: 1;
+  transform: scale(1) translateZ(0);
+}
+
+.dc-transition-orbit {
+  position: absolute;
+  width: 100%;
+  aspect-ratio: 1;
+  border: 1px solid rgba(229, 199, 111, 0.58);
+  border-radius: 50%;
+  transform: translateZ(0);
+  will-change: transform, opacity;
+}
+
+.dc-transition-orbit-b {
+  width: 72%;
+  transform: rotateX(68deg) rotateZ(-30deg);
+  border-color: rgba(229, 199, 111, 0.34);
+}
+
+.dc-page-transition.is-active .dc-transition-orbit-a {
+  animation: dc-orbit-a 0.78s cubic-bezier(.22, .61, .36, 1) both;
+}
+
+.dc-page-transition.is-active .dc-transition-orbit-b {
+  animation: dc-orbit-b 0.78s 0.06s cubic-bezier(.22, .61, .36, 1) both;
+}
+
+.dc-transition-signal {
+  width: 13px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #e5c76f;
+  box-shadow: 0 0 0 7px rgba(229, 199, 111, 0.11), 0 0 18px rgba(229, 199, 111, 0.7);
+  will-change: transform, opacity;
+}
+
+.dc-page-transition.is-active .dc-transition-signal {
+  animation: dc-signal 0.72s 0.1s ease-in-out both;
+}
+
+.dc-transition-core p {
+  position: absolute;
+  top: calc(100% + 20px);
+  width: max-content;
+  max-width: 80vw;
+  margin: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-align: center;
+}
+
+@keyframes dc-orbit-a {
+  from { transform: translateZ(0) rotate(-36deg); opacity: 0; }
+  to { transform: translateZ(0) rotate(0deg); opacity: 1; }
+}
+
+@keyframes dc-orbit-b {
+  from { transform: rotateX(68deg) rotateZ(-76deg); opacity: 0; }
+  to { transform: rotateX(68deg) rotateZ(-30deg); opacity: 1; }
+}
+
+@keyframes dc-signal {
+  from { transform: scale(0.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dc-page-transition,
+  .dc-page-transition.is-active,
+  .dc-transition-core { transition-duration: 0.01ms; }
+  .dc-transition-orbit,
+  .dc-transition-signal { animation: none; }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 720px) {
+  .about-grid {
+    grid-template-columns: 1fr;
+  }
+  .about-photo {
+    max-width: 320px;
+    width: 100%;
+    margin-inline: auto;
+  }
+  .hero-title { flex-direction: column; gap: 0.1em; }
+}

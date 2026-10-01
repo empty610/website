@@ -1,0 +1,77 @@
+/* Mobile layout overrides follow all component styles. */
+@media (max-width: 760px) {
+  .app { padding: calc(8px + env(safe-area-inset-top)) 12px calc(64px + env(safe-area-inset-bottom)); }
+  #mars-back { top: calc(16px + env(safe-area-inset-top)); right: 20px; min-width: 88px; min-height: 44px; padding: 10px 12px; font-size: 11px; }
+  .music-toggle { right: 12px; bottom: max(14px, env(safe-area-inset-bottom)); }
+  .header { align-items: flex-start; padding: 12px 14px; gap: 12px; }
+  .header > div { min-width: 0; width: 100%; }
+  .header h1 { padding-right: 88px; font-size: 18px; }
+  .header .eyebrow { padding-right: 88px; font-size: 8px; line-height: 1.6; overflow-wrap: anywhere; }
+  .header-subtitle { font-size: 11px; line-height: 1.7; }
+  .header .badge { display: none; }
+  .heading { gap: 10px; padding: 12px 14px; min-height: 54px; flex-wrap: wrap; }
+  .heading > div { min-width: 0; }
+  .heading h2 { font-size: 12px; line-height: 1.6; }
+  .heading > p { display: none; }
+  .planet-panel > .heading { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .planet-view-tabs { width: 100%; }
+  .planet-view-tabs button { flex: 1; min-height: 44px; padding: 8px 4px; font-size: 12px; }
+
+  #mars-stage.moons-ready { height: 600px; min-height: 600px; }
+  .moon-toolbar { top: 10px; width: calc(100% - 24px); max-width: 420px; gap: 2px; }
+  .moon-toolbar button { flex: 1; min-width: 0; min-height: 42px; padding: 8px 4px; font-size: 12px; }
+  #mars-stage.moons-ready #mars-3d, #mars-stage .moon-labels { inset: 126px 0 140px; }
+  #mars-stage.moons-ready .planet-intro { top: 69px; left: 12px; right: 12px; width: auto; max-width: none; padding: 14px; }
+  #mars-stage .intro-title { min-height: 24px; }
+  #mars-stage .intro-divider { display: none; }
+  #mars-stage .moon-archives { top: 69px; left: 12px; width: calc(100% - 24px); }
+  #mars-stage .moon-archive { padding: 14px; }
+  #mars-stage .moon-archive-title { min-height: 24px; }
+  #mars-stage .planet-intro p, #mars-stage .moon-archive p { font-size: 13px; line-height: 1.85; }
+  .moon-info { left: 12px; right: 12px; bottom: 62px; max-width: none; padding: 12px 14px; }
+  .moon-info strong { font-size: 14px; }
+  .moon-info p { font-size: 12px; line-height: 1.7; }
+  .moon-label { padding: 8px; font-size: 10px; }
+  .moon-sources { bottom: 12px; left: 12px; max-width: calc(100% - 180px); font-size: 10px; line-height: 1.7; }
+  #mars-stage .rotation-toggle { right: 12px; bottom: 12px; min-height: 42px; font-size: 12px; }
+
+  .planet-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0; }
+  .planet-facts > div { min-width: 0; padding: 16px; border-bottom: 1px solid var(--line); }
+  .planet-facts > div:nth-child(even) { border-right: 0; }
+  .planet-facts > div:nth-last-child(-n+2) { border-bottom: 0; }
+  .planet-facts strong { font-size: 22px; }
+  .planet-facts span { font-size: 11px; letter-spacing: .04em; }
+  .terrain-grid, .appearance-grid, .landform-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 12px; }
+  .terrain-card, .appearance-card { min-width: 0; }
+  .terrain-copy p, .appearance-copy p { min-height: 0; font-size: 11px; line-height: 1.7; }
+  .terrain-copy h3, .appearance-copy h3 { font-size: 12px; line-height: 1.6; }
+  .terrain-copy, .appearance-copy { padding: 10px 11px 11px; }
+  .terrain-source, .appearance-source { font-size: 8px; line-height: 1.7; overflow-wrap: anywhere; }
+  .landform-sources { font-size: 10px; line-height: 1.8; overflow-wrap: anywhere; }
+  .rover-panel, .pioneer-panel { padding: 12px; }
+  .rover-selectors { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rover-selector { min-height: 46px; }
+  .rover-overview, .rover-detail { grid-template-columns: minmax(0, 1fr); }
+  .rover-summary { display: block; }
+  .rover-summary dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 12px; }
+  .rover-concept img { height: auto; max-height: 320px; }
+  .route-viewport { height: clamp(240px, 75vw, 360px); }
+  .route-heading, .route-toolbar, .map-topline { flex-wrap: wrap; }
+  .rover-button, .route-toolbar button, .pioneer-tabs button { min-height: 42px; font-size: 12px; }
+  .rover-science, #rover-notes-content { padding: 16px; }
+  .rover-finding p, .rover-surface figcaption, .route-note, .rover-intro p:not(.rover-kicker) { font-size: 13px; line-height: 1.85; }
+  .rover-waypoints { grid-template-columns: minmax(0, 1fr); }
+  .rover-waypoints button { min-height: 44px; font-size: 12px; }
+  .pioneer-tabs button { flex: 1 1 40%; }
+  .orbit-stage { height: auto; aspect-ratio: 640 / 530; min-height: 0; }
+  #orbit-timeline { grid-template-columns: minmax(0, 1fr); }
+  #orbit-timeline .range { height: 32px; touch-action: pan-y; }
+  .transport button, .speed button { min-width: 44px; min-height: 44px; }
+  .sky-toolbar, .sky-sync-note { flex-wrap: wrap; gap: 8px; }
+  .sky-sync-note #sky-date { margin-left: 0; }
+  .sky-caption, .model p { font-size: 12px; line-height: 1.8; }
+  .speed { flex-wrap: wrap; }
+}
+@media (max-width: 560px) {
+  #mars-stage.moons-ready { height: 560px; min-height: 560px; }
+}

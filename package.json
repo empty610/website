@@ -1,0 +1,23 @@
+{
+  "name": "website",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Personal website and astronomy projects by empty610",
+  "author": "empty610",
+  "scripts": {
+    "dev": "bun --bun vite",
+    "build": "bun --bun vite build && bun scripts/prerender.js",
+    "preview": "bun --bun vite preview",
+    "check": "bun scripts/check-build.js"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.9",
+    "@vue/server-renderer": "^3.5.43",
+    "vite": "^8.3.2"
+  },
+  "dependencies": {
+    "vue": "^3.5.43",
+    "vue-router": "4"
+  }
+}

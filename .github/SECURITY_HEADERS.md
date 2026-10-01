@@ -1,6 +1,6 @@
 # Deployment security headers
 
-The repository root contains `_headers`, using the format supported by Cloudflare
+`public/_headers` uses the format supported by Cloudflare
 Pages. It applies the Content Security Policy and related response headers to every
 path.
 
@@ -10,8 +10,8 @@ so the deployment header remains the authoritative policy.
 
 ## Cloudflare Pages
 
-No extra build step is required. Publish `_headers` with the rest of the site and
-verify the deployed response with:
+Run `bun install` and `bun run build`, then publish the complete `dist/` directory.
+Vite copies `public/_headers` into `dist/_headers`. Verify the deployed response with:
 
 ```powershell
 curl.exe -I https://empty610.com/
