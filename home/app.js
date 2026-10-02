@@ -92,6 +92,11 @@ function setupReveal() {
 function setupScrollFade() {
   const els = Array.from(document.querySelectorAll('.reveal-fade'));
   if (!els.length) return;
+  const hero = document.querySelector('.hero');
+  const scrollCue = hero?.querySelector('.scroll-cue');
+  const deepLinked = ['#about', '#dc', '#venus', '#mars', '#contact'].includes(location.hash);
+  let waitingForInitialAnchor = deepLinked;
+  let dismissedByClick = false;
 
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
   const smooth = (t) => t * t * (3 - 2 * t); // smoothstep，头尾更柔和
@@ -99,6 +104,14 @@ function setupScrollFade() {
   const update = () => {
     const vh = window.innerHeight;
     const span = vh * 0.6; // 过渡带宽度：占视口高度比例
+
+    if (scrollCue && hero) {
+      const heroTop = hero.getBoundingClientRect().top;
+      if (waitingForInitialAnchor && (heroTop < -1 || !location.hash)) waitingForInitialAnchor = false;
+      const awayFromWelcome = heroTop < -Math.min(vh * 0.16, 140);
+      if (awayFromWelcome) dismissedByClick = false;
+      scrollCue.classList.toggle('is-hidden', waitingForInitialAnchor || awayFromWelcome || dismissedByClick);
+    }
 
     els.forEach((el) => {
       const rect = el.getBoundingClientRect();
@@ -110,6 +123,11 @@ function setupScrollFade() {
 
   window.addEventListener('scroll', update, { passive: true });
   window.addEventListener('resize', update);
+  window.addEventListener('pageshow', () => requestAnimationFrame(update));
+  scrollCue?.addEventListener('click', () => {
+    dismissedByClick = true;
+    scrollCue.classList.add('is-hidden');
+  });
   update();
 }
 

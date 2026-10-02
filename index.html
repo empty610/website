@@ -9,7 +9,7 @@
   <link rel="preload" href="shared/fonts/ITCAvantGardePro-Bold.woff2" as="font" type="font/woff2" crossorigin />
 
   <!-- 孤星同款advant garde居然要钱，太痛苦了。还有，看得开心 =-) -->
-  <link rel="stylesheet" href="home/home.css?v=20260923-mars" />
+  <link rel="stylesheet" href="home/home.css?v=20261002-scroll-cue" />
 </head>
 <body>
   <div id="app" class="board">
@@ -38,6 +38,12 @@
           <span class="hero-cn">欢迎</span>
         </h1>
         <span class="accent-bar" aria-hidden="true"></span>
+        <a class="scroll-cue" href="#about" aria-label="向下滚动以开始，前往关于我">
+          <span class="scroll-cue-text">向下滚动以开始</span>
+          <svg class="scroll-cue-arrow" viewBox="0 0 18 28" aria-hidden="true" focusable="false">
+            <path d="M9 1v23m-6-6 6 6 6-6" />
+          </svg>
+        </a>
       </section>
 
 
@@ -188,7 +194,7 @@
   </button>
 
   <script src="shared/music.js?v=20260907" defer></script>
-  <script src="home/app.js?v=20260923-mars" defer></script>
+  <script src="home/app.js?v=20261002-scroll-cue" defer></script>
   <script src="shared/idle-controls.js?v=20260910" defer></script>
   <script src="home/navigation.js?v=20260923-mars" defer></script>
   <script type="module" src="home/venus-preview.js?v=20260923-mars"></script>
