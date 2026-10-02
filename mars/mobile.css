@@ -30,12 +30,14 @@
   #mars-stage .moon-archive-title { min-height: 22px; }
   #mars-stage .planet-intro.is-open, #mars-stage .moon-archive.is-open { max-height: min(380px, 56svh); }
   #mars-stage .planet-intro p, #mars-stage .moon-archive p { font-size: 13px; line-height: 1.85; }
-  .moon-info { left: 12px; right: 12px; bottom: 62px; max-width: none; padding: 12px 14px; }
+  .moon-info { left: 12px; right: 12px; bottom: 108px; max-width: none; padding: 12px 14px; }
   .moon-info strong { font-size: 14px; }
   .moon-info p { font-size: 12px; line-height: 1.7; }
   .moon-label { padding: 8px; font-size: 10px; }
   .moon-sources { bottom: 12px; left: 12px; max-width: calc(100% - 180px); font-size: 10px; line-height: 1.7; }
-  #mars-stage .rotation-toggle { right: 12px; bottom: 12px; min-height: 42px; font-size: 12px; }
+  #mars-stage .model-controls { right: 12px; bottom: 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 184px; }
+  #mars-stage .model-controls button { min-height: 42px; padding: 8px 6px; font-size: 11px; }
+  #mars-stage .model-controls button:last-child { grid-column: 1 / -1; }
 
   .planet-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0; }
   .planet-facts > div { min-width: 0; padding: 16px; border-bottom: 1px solid var(--line); }

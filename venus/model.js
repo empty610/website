@@ -48,6 +48,11 @@ export async function mountVenus(stage, mount, { preview = false, surface = './v
         color: 0xffffff,
         toneMapped: false
       });
+      const dayNightMaterial = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        roughness: 1,
+        metalness: 0
+      });
       const sphere = new THREE.Mesh(new THREE.SphereGeometry(1.34, 64, 64), material);
       world.add(sphere);
 
@@ -59,6 +64,8 @@ export async function mountVenus(stage, mount, { preview = false, surface = './v
           map.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 4);
           material.map = map;
           material.needsUpdate = true;
+          dayNightMaterial.map = map;
+          dayNightMaterial.needsUpdate = true;
           stage.classList.remove('is-error');
           // Upload the completed texture and paint one real frame before revealing
           // the canvas, so a blank sphere can never flash on screen.
@@ -115,7 +122,8 @@ export async function mountVenus(stage, mount, { preview = false, surface = './v
       );
       world.add(glow);
 
-      scene.add(new THREE.HemisphereLight(0xfff4df, 0x6c4b2d, 1.8));
+      const ambientLight = new THREE.HemisphereLight(0xfff4df, 0x6c4b2d, 1.8);
+      scene.add(ambientLight);
       const keyLight = new THREE.DirectionalLight(0xfff1cf, 4.3);
       keyLight.position.set(-3.6, 2.1, 4.8);
       scene.add(keyLight);
@@ -130,10 +138,45 @@ export async function mountVenus(stage, mount, { preview = false, surface = './v
       controls.enablePan = false;
       controls.minDistance = 2.7;
       controls.maxDistance = 6;
-      controls.autoRotate = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      controls.autoRotateSpeed = .55;
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      let autoRotate = !reducedMotion.matches;
       controls.rotateSpeed = 1.2;
       controls.zoomSpeed = .9;
+
+      let defaultDistance = camera.position.length();
+      if (!preview) {
+        const rotationButton = document.getElementById('venus-rotation-toggle');
+        const lightingButton = document.getElementById('venus-lighting-toggle');
+        const resetButton = document.getElementById('venus-reset-view');
+        let dayNight = false;
+        const syncRotationButton = () => {
+          rotationButton.textContent = autoRotate ? '暂停自转' : '继续自转';
+          rotationButton.setAttribute('aria-pressed', String(!autoRotate));
+        };
+        syncRotationButton();
+        rotationButton.addEventListener('click', () => {
+          autoRotate = !autoRotate;
+          syncRotationButton();
+        });
+        reducedMotion.addEventListener('change', () => {
+          if (reducedMotion.matches) { autoRotate = false; syncRotationButton(); }
+        });
+        lightingButton.addEventListener('click', () => {
+          dayNight = !dayNight;
+          sphere.material = dayNight ? dayNightMaterial : material;
+          ambientLight.intensity = dayNight ? .5 : 1.8;
+          keyLight.intensity = dayNight ? 3.2 : 4.3;
+          rimLight.intensity = dayNight ? .12 : 1.35;
+          lightingButton.textContent = dayNight ? '均匀照明' : '昼夜照明';
+          lightingButton.setAttribute('aria-pressed', String(dayNight));
+        });
+        resetButton.addEventListener('click', () => {
+          controls.target.set(0, 0, 0);
+          camera.position.set(0, .08, defaultDistance);
+          camera.position.setLength(defaultDistance);
+          controls.update();
+        });
+      }
 
       const resize = () => {
         const width = Math.max(mount.clientWidth, 1);
@@ -145,6 +188,7 @@ export async function mountVenus(stage, mount, { preview = false, surface = './v
         const angle = Math.min(halfFov, Math.atan(Math.tan(halfFov) * camera.aspect));
         const fitDistance = 1.60 / Math.sin(angle);
         camera.position.setLength(fitDistance);
+        defaultDistance = fitDistance;
         controls.maxDistance = Math.max(6, fitDistance * 1.6);
         camera.updateProjectionMatrix();
       };
@@ -163,7 +207,8 @@ export async function mountVenus(stage, mount, { preview = false, surface = './v
         if (time - lastRenderTime < frameInterval) return;
         const delta = Math.min((time - lastRenderTime) / 1000, .05);
         lastRenderTime = time;
-        controls.update(delta);
+        if (autoRotate) sphere.rotation.y += delta * .055;
+        controls.update();
         renderer.render(scene, camera);
       };
 

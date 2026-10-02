@@ -57,7 +57,7 @@ window.setupMarsMoons=function({scene,camera,renderer,controls,world,sphere,stag
   const label=document.createElement('button');label.type='button';label.className='moon-label';label.style.setProperty('--moon-color',b.color);label.textContent=b.name+' · '+b.en;label.setAttribute('aria-label','放大查看'+b.name);label.onclick=()=>focus(id);labels.append(label);b.label=label;
  }
  bodies.mars.bound=1.38;
- let selected='system',flight=null,savedRotate=controls.autoRotate;
+ let selected='system',flight=null;
  const direction=new T.Vector3(0,.48,1).normalize();
  function center(id){return id==='system'?new T.Vector3():bodies[id].mesh.getWorldPosition(new T.Vector3());}
  function distance(id) {
@@ -70,8 +70,7 @@ window.setupMarsMoons=function({scene,camera,renderer,controls,world,sphere,stag
  function updateInfo(id){info.innerHTML=id==='system'?'<strong>火星与它的两颗卫星</strong><p>天体大小与轨道距离采用同一真实比例。<br>点击卫星标签靠近查看；标签圆点仅为定位标记。轨道相位为示意。</p>':`<strong>${bodies[id].name} <small>${bodies[id].en}</small></strong><p>${bodies[id].text}<br>镜头近距观察 · 天体尺寸保持真实比例</p>`;}
  function focus(id,instant=false) {
  if(!bodies[id]&&id!=='system')return;
-  if(!flight)savedRotate=controls.autoRotate;
-  controls.autoRotate=false;controls.enabled=false;controls.enableDamping=false;rotationButton.disabled=true;
+  controls.enabled=false;controls.enableDamping=false;rotationButton.disabled=true;
   const fromId=selected,target=center(id),fromTarget=controls.target.clone(),fromPos=camera.position.clone();
   selected=id;stage.classList.toggle('moon-closeup',id==='phobos'||id==='deimos');
   for(const moon of ['phobos','deimos'])document.getElementById(moon+'-archive').hidden=moon!==id;
@@ -115,7 +114,7 @@ window.setupMarsMoons=function({scene,camera,renderer,controls,world,sphere,stag
    : Math.exp(Math.log(f.fromDistance)*(1-zoom)+Math.log(f.toDistance)*zoom);
   camera.position.copy(controls.target).addScaledVector(dir,dist);
   }
-  if(t===1){flight=null;limits(selected);controls.enabled=true;controls.enableDamping=true;controls.autoRotate=savedRotate;rotationButton.disabled=false;}
+  if(t===1){flight=null;limits(selected);controls.enabled=true;controls.enableDamping=true;rotationButton.disabled=false;}
  }
  const point=new T.Vector3(),ray=new T.Raycaster();
  function overlayRect(element) {
@@ -162,5 +161,5 @@ window.setupMarsMoons=function({scene,camera,renderer,controls,world,sphere,stag
  new ResizeObserver(()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if(mount.clientWidth&&mount.clientHeight)focus(selected,true);},80);}).observe(mount);
  window.MarsMoons={bodies,focus,camera,controls,get selected(){return selected;},get transitioning(){return !!flight;},unit};
  focus('system',true);
- return {beforeFrame,afterFrame};
+ return {beforeFrame,afterFrame,bodies,resetView:()=>focus(selected)};
 };

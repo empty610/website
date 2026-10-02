@@ -968,7 +968,10 @@
     .planet-facts span { display:block; color:var(--muted); font-size:10px; margin-bottom:8px; letter-spacing:.12em; }
     .planet-facts strong { font:500 22px var(--mono); color:#a6583c; }
     .planet-facts small { color:var(--muted); font:11px var(--mono); }
-    .rotation-toggle { position:absolute; right:18px; bottom:14px; z-index:3; border:1px solid var(--line-strong); border-radius:8px; padding:7px 11px; color:var(--muted); background:var(--panel); font-size:10px; cursor:pointer; }
+    .model-controls { position:absolute; right:16px; bottom:14px; z-index:7; display:flex; gap:6px; }
+    .model-controls button, .model-controls .rotation-toggle { position:static; min-height:36px; border:1px solid var(--line-strong); border-radius:8px; padding:8px 11px; color:var(--fg); background:rgba(250,247,240,.92); font-size:11px; cursor:pointer; white-space:nowrap; }
+    .model-controls button[aria-pressed="true"] { border-color:var(--gold); color:#884a35; }
+    .model-controls button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
     .planet-fallback img { max-width:100%; max-height:300px; border-radius:12px; }
     .terrain-card[data-image-full="assets/polar.jpg"] img { object-fit:contain; background:#f1eadf; }
     .planet-stage.is-error #mars-3d { display:none; }

@@ -129,7 +129,8 @@
       );
       world.add(glow);
 
-      scene.add(new THREE.HemisphereLight(0xfff4df, 0x62544b, 1.75));
+      const ambientLight = new THREE.HemisphereLight(0xfff4df, 0x62544b, 1.75);
+      scene.add(ambientLight);
       const keyLight = new THREE.DirectionalLight(0xfff1e7, 2.0);
       keyLight.position.set(-3.6, 2.1, 4.8);
       scene.add(keyLight);
@@ -143,16 +144,32 @@
       controls.enablePan = false;
       controls.minDistance = 2.7;
       controls.maxDistance = 6;
-      controls.autoRotate = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      controls.autoRotateSpeed = .55;
+      let autoRotate = !reducedMotion.matches;
       const rotationButton = document.getElementById('rotation-toggle');
-      function syncRotationButton(){ rotationButton.textContent=controls.autoRotate?'暂停自转':'自动旋转'; rotationButton.setAttribute('aria-pressed',String(!controls.autoRotate)); }
-      rotationButton.onclick=()=>{controls.autoRotate=!controls.autoRotate;syncRotationButton()};
+      function syncRotationButton(){ rotationButton.textContent=autoRotate?'暂停自转':'继续自转'; rotationButton.setAttribute('aria-pressed',String(!autoRotate)); }
+      rotationButton.onclick=()=>{autoRotate=!autoRotate;syncRotationButton()};
       syncRotationButton();
+      reducedMotion.addEventListener('change', () => {
+        if (reducedMotion.matches) { autoRotate = false; syncRotationButton(); }
+      });
       controls.rotateSpeed = 1.2;
       controls.zoomSpeed = .9;
 
       const moons=window.setupMarsMoons({scene,camera,renderer,controls,world,sphere,stage,mount,surfaceMaterialOptions});
+      const lightingButton = document.getElementById('mars-lighting-toggle');
+      const resetButton = document.getElementById('mars-reset-view');
+      const surfaces = [material, moons.bodies.phobos.mesh.material, moons.bodies.deimos.mesh.material];
+      let dayNight = false;
+      lightingButton.addEventListener('click', () => {
+        dayNight = !dayNight;
+        ambientLight.intensity = dayNight ? .18 : 1.75;
+        keyLight.intensity = dayNight ? 2.8 : 2.0;
+        rimLight.intensity = dayNight ? .08 : .35;
+        surfaces.forEach(surface => { surface.emissiveIntensity = dayNight ? 0 : .2; });
+        lightingButton.textContent = dayNight ? '均匀照明' : '昼夜照明';
+        lightingButton.setAttribute('aria-pressed', String(dayNight));
+      });
+      resetButton.addEventListener('click', () => moons.resetView());
 
       const resize = () => {
         const width = Math.max(mount.clientWidth, 1);
@@ -175,7 +192,13 @@
         if (!isRunning) return;
         animationFrame = requestAnimationFrame(animate);
         if (time - lastRenderTime < frameInterval) return;
+        const delta = Math.min((time - lastRenderTime) / 1000, .05);
         lastRenderTime = time;
+        if (autoRotate) {
+          sphere.rotation.y += delta * .055;
+          moons.bodies.phobos.mesh.rotation.y += delta * .11;
+          moons.bodies.deimos.mesh.rotation.y += delta * .075;
+        }
         moons.beforeFrame(time);
         controls.update();
         renderer.render(scene, camera);

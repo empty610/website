@@ -6,7 +6,7 @@
   <meta name="description" content="交互探索金星的日心轨道、晨昏星变化、相位、视星等与视直径。">
   <title>Venus · empty610.com</title>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-src 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; style-src-elem 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self'; connect-src 'self'; worker-src 'none'; manifest-src 'self'; form-action 'none'; upgrade-insecure-requests" />
-  <link rel="stylesheet" href="venus.css?v=20260926-orbit-sun" />
+  <link rel="stylesheet" href="venus.css?v=20261002-model-controls" />
   <link rel="stylesheet" href="site.css?v=20260916-music-idle" />
 <!--这里的东西写得不一定准确，大部份资料来自NASA，我使用Deepseek和ChatGPT补全了一部分内容并完成了标签的搭建，如有错误欢迎指点-->
 </head>
@@ -37,6 +37,11 @@
           <p>了解金星，能帮我们理解温室效应，大气逃逸，火山活动，行星演化的内外部规律与行星宜居性的判断————人类曾以为金星亦可成为第二个家园。因此，当我们仰望夜空中最耀眼的行星时，不应该想到夺目光芒下的死寂炼狱，也应当思考它为人类的发展带来了怎样的启示，以及我们将从这启示中得到什么。</p>
         </section>
         <p class="planet-hint">拖动旋转 · 滚轮或双指缩放</p>
+        <div class="model-controls" role="group" aria-label="金星模型控制">
+          <button id="venus-rotation-toggle" type="button" aria-pressed="false">暂停自转</button>
+          <button id="venus-lighting-toggle" type="button" aria-pressed="false">昼夜照明</button>
+          <button id="venus-reset-view" type="button">重置视角</button>
+        </div>
         <div class="planet-fallback">3D 模型暂时无法载入，请刷新页面。</div>
       </div>
     </section>
@@ -121,7 +126,7 @@
   </dialog>
   <script src="venus.js?v=20260926-orbit-sun" defer></script>
   <script src="../shared/idle-controls.js?v=20260910" defer></script>
-  <script type="module" src="page.js?v=20260910-shared-idle"></script>
+  <script type="module" src="page.js?v=20261002-model-controls"></script>
   <audio id="bg-music" src="../shared/audio/ad%20astra.mp3" loop preload="none" hidden></audio>
   <button id="music-toggle" class="music-toggle" type="button" data-idle-hide aria-label="播放或暂停音乐" aria-pressed="false" title="音乐"><span aria-hidden="true">♪</span></button>
   <script src="../shared/music.js?v=20260907" defer></script>

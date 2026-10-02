@@ -6,15 +6,15 @@
   <meta name="description" content="交互探索火星三维模型、地貌、合冲周期与逆行，认识这颗红色星球。">
   <title>Mars · empty610.com</title>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-src 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; style-src-elem 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self'; connect-src 'self'; worker-src 'none'; manifest-src 'self'; form-action 'none'; upgrade-insecure-requests" />
-  <link rel="stylesheet" href="mars.css?v=20260926-orbit-sun" />
+  <link rel="stylesheet" href="mars.css?v=20261002-model-controls" />
   <link rel="stylesheet" href="site.css?v=20260923" />
   <script defer src="vendor/three.js"></script>
   <script defer src="vendor/OrbitControls.js"></script>
   <script defer src="assets/mars-texture.js"></script>
   <script defer src="simulation.js?v=20260926-orbit-sun"></script>
   <script defer src="assets/moons/moon-assets.js"></script>
-  <script defer src="moons.js?v=20260926-texture-guard"></script>
-  <script defer src="planet.js"></script>
+  <script defer src="moons.js?v=20261002-model-controls"></script>
+  <script defer src="planet.js?v=20261002-model-controls"></script>
   <link rel="stylesheet" href="rovers.css">
   <script defer src="rover-data.js"></script>
   <script defer src="rovers.js?v=20260923-wheel"></script>
@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="pioneer.css">
   <script defer src="pioneer.js"></script>
   <link rel="stylesheet" href="moons.css">
-  <link rel="stylesheet" href="mobile.css?v=20260923-venus-layout" />
+  <link rel="stylesheet" href="mobile.css?v=20261002-model-controls" />
 </head>
 <body>
   <a id="mars-back" class="site-back" href="../#mars" data-idle-hide aria-label="返回个人主页火星入口" title="Back"><svg class="back-u-turn" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5 5 9l4 4M5 9h8a5 5 0 0 1 5 5v1" /></svg><span>BACK</span></a>
@@ -55,7 +55,12 @@
     <p>因此，研究火星，实际上是在同时研究三个问题：火星过去发生了什么?地球为什么没有变成今天的火星?一个曾经可能宜居的行星，是否真的产生过生命？它们是人类仍在探索的问题，而第三个问题一旦获得可靠答案——无论答案最终是“有”还是“没有”，都必将深刻影响我们对太阳系乃至宇宙中生命普遍性的理解。</p>
     <p><a href="https://science.nasa.gov/mars/facts/" target="_blank" rel="noopener">资料：NASA · Mars Facts ↗</a></p>
   </div></section>
-        <p class="planet-hint">拖动以旋转 · 滚轮或双指缩放</p><button class="rotation-toggle" id="rotation-toggle" type="button" aria-pressed="false">暂停自转</button>
+        <p class="planet-hint">拖动以旋转 · 滚轮或双指缩放</p>
+        <div class="model-controls" role="group" aria-label="火星与卫星模型控制">
+          <button class="rotation-toggle" id="rotation-toggle" type="button" aria-pressed="false">暂停自转</button>
+          <button id="mars-lighting-toggle" type="button" aria-pressed="false">昼夜照明</button>
+          <button id="mars-reset-view" type="button">重置视角</button>
+        </div>
         <div class="planet-fallback"><img src="assets/mars-texture.jpg" alt="火星全球表面贴图"><span>当前设备无法加载三维模型，已显示全球贴图。也许你该换台设备？</span></div>
       </div>
       <section id="rover-panel" class="rover-panel" role="tabpanel" aria-labelledby="rovers-tab" hidden>

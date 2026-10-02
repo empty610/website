@@ -6,7 +6,7 @@ async function startPreview() {
   if (started) return;
   started = true;
   try {
-    const { mountVenus } = await import('../venus/model.js?v=20260923-mars');
+    const { mountVenus } = await import('../venus/model.js?v=20261002-model-controls');
     await mountVenus(stage, mount, { preview: true, surface: '../mars/assets/mars-texture.jpg', tilt: 25.19 });
   } catch {
     stage.classList.add('is-error');

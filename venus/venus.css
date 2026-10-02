@@ -961,3 +961,30 @@
       .event { grid-template-columns: 28px 1fr; }
       .event time { display: none; }
     }
+    .model-controls {
+      position: absolute;
+      z-index: 4;
+      right: 16px;
+      bottom: 14px;
+      display: flex;
+      gap: 6px;
+    }
+    .model-controls button {
+      min-height: 36px;
+      padding: 8px 11px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: rgba(250, 247, 240, .92);
+      color: var(--fg);
+      font-size: 11px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .model-controls button[aria-pressed="true"] { border-color: var(--gold); color: #76591d; }
+    .model-controls button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+    @media (max-width: 560px) {
+      .model-controls { right: 12px; bottom: 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 184px; }
+      .model-controls button { min-height: 42px; padding: 8px 6px; font-size: 11px; }
+      .model-controls button:last-child { grid-column: 1 / -1; }
+      .planet-stage .planet-hint { bottom: 113px; }
+    }
