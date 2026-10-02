@@ -19,10 +19,10 @@
 
         function loadThree() {
             if (!threeLoadPromise) {
-                threeLoadPromise = loadScript('../vendor/three/build/three.min.js')
-                    .then(() => loadScript('../vendor/three/examples/jsm/controls/OrbitControls.global.js'))
+                threeLoadPromise = loadScript('../shared/vendor/three/build/three.min.js')
+                    .then(() => loadScript('../shared/vendor/three/examples/jsm/controls/OrbitControls.global.js'))
                     .then(() => location.protocol === 'file:'
-                        ? loadScript('../assets/textures/earth_atmos_2048.data.js')
+                        ? loadScript('assets/textures/earth_atmos_2048.data.js')
                         : undefined)
                     .then(() => {
                     THREE = globalThis.THREE;
@@ -221,7 +221,7 @@
             const radius = 1.25;
             const textureUrl = location.protocol === 'file:'
                 ? globalThis.EARTH_TEXTURE_DATA_URL
-                : '../assets/textures/earth_atmos_2048.jpg';
+                : 'assets/textures/earth_atmos_2048.jpg';
             let earthTextureReady = false;
             const tex = new THREE.TextureLoader().load(
                 textureUrl,

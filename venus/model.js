@@ -11,8 +11,8 @@ function loadScript(path) {
 async function loadEngine() {
   if (!enginePromise) {
     enginePromise = (async () => {
-      if (!window.THREE) await loadScript('../vendor/three/build/three.min.js');
-      if (!window.OrbitControls) await loadScript('../vendor/three/examples/jsm/controls/OrbitControls.global.js');
+      if (!window.THREE) await loadScript('../shared/vendor/three/build/three.min.js');
+      if (!window.OrbitControls) await loadScript('../shared/vendor/three/examples/jsm/controls/OrbitControls.global.js');
       return window.THREE;
     })();
   }

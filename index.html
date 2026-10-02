@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>empty610's website</title>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-src 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; style-src-elem 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self'; connect-src 'self'; worker-src 'none'; manifest-src 'self'; form-action 'none'; upgrade-insecure-requests" />
-  <script src="page-init.js" defer></script>
-  <link rel="preload" href="ITCAvantGardePro-Bold.woff2" as="font" type="font/woff2" crossorigin />
+  <script src="home/page-init.js" defer></script>
+  <link rel="preload" href="shared/fonts/ITCAvantGardePro-Bold.woff2" as="font" type="font/woff2" crossorigin />
 
   <!-- 孤星同款advant garde居然要钱，太痛苦了。还有，看得开心 =-) -->
-  <link rel="stylesheet" href="home.css?v=20260923-mars" />
+  <link rel="stylesheet" href="home/home.css?v=20260923-mars" />
 </head>
 <body>
   <div id="app" class="board">
@@ -60,7 +60,7 @@
             </p>
         </div>
           <figure class="about-photo">
-            <img class="photo" src="avatar-560.webp" width="560" height="560" alt="我的照片" />
+            <img class="photo" src="home/assets/avatar-560.webp" width="560" height="560" alt="我的照片" />
           </figure>
         </div>
       </section>
@@ -115,7 +115,7 @@
         <p class="future-sub"><b>这里暂时没有更多的内容。</b></p>
         <!-- 我会尽快补充内容，如果我真的能补上我自己给自己画的大饼（躺）-->
         <p class="future-body">或许我会在不久之后实装一些项目在这，这会包括一个能帮助你了解太阳系的模型，以及针对太阳系各大行星的介绍，现在已经做了金星与火星，我正在思考是否要新建一个站点专门存放它。你或许可以从这里了解到人类对太阳系各大行星的探索程度与主要的科研成果。但至少现在，这里还什么都没有。</p>
-        <p class="future-body">在此，再次感谢你观看我的网站，并祝愿你看得开心。如果你能在我的编辑的内容中获得一些对你有用的东西，我不胜荣幸。<p>
+        <p class="future-body">在此，再次感谢你观看我的网站，并祝愿你看得开心。如果你能在我的编辑的内容中获得一些对你有用的东西，我不胜荣幸。</p>
       </section>
 
       <!-- 联系 -->
@@ -180,19 +180,19 @@
   </div>
 
   <!-- 背景音乐ad astra，来自明日方舟四周年活动《孤星》，版权所属非我所有，仅用于个人网页介绍非商业用途，如有侵权请联系删除 -->
-  <audio id="bg-music" src="ad astra.mp3" loop preload="none" style="display:none"></audio>
+  <audio id="bg-music" src="shared/audio/ad astra.mp3" loop preload="none" style="display:none"></audio>
 
   <!-- 音乐播放/暂停小按钮 -->
   <button id="music-toggle" class="music-toggle" type="button" data-idle-hide aria-label="播放或暂停音乐" aria-pressed="false" title="音乐">
     <span aria-hidden="true">♪</span>
   </button>
 
-  <script src="music.js?v=20260907" defer></script>
-  <script src="app.js?v=20260923-mars" defer></script>
-  <script src="idle-controls.js?v=20260910" defer></script>
-  <script src="navigation.js?v=20260923-mars" defer></script>
-  <script type="module" src="venus-preview.js?v=20260923-mars"></script>
-  <script type="module" src="mars-preview.js?v=20260923-mars"></script>
+  <script src="shared/music.js?v=20260907" defer></script>
+  <script src="home/app.js?v=20260923-mars" defer></script>
+  <script src="shared/idle-controls.js?v=20260910" defer></script>
+  <script src="home/navigation.js?v=20260923-mars" defer></script>
+  <script type="module" src="home/venus-preview.js?v=20260923-mars"></script>
+  <script type="module" src="home/mars-preview.js?v=20260923-mars"></script>
 
 </body>
 </html>
