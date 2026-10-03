@@ -23,10 +23,23 @@ const TAU=Math.PI*2,CYCLE=583.92,VR=.723,INC=3.394*Math.PI/180,NODE=1.34;
     const intro=$('venus-intro'),introToggle=$('intro-toggle');
     function setIntro(open){intro.classList.toggle('is-open',open);introToggle.setAttribute('aria-expanded',String(open));introToggle.setAttribute('aria-label',open?'收起金星介绍':'展开金星介绍');$('intro-toggle-hint').textContent=open?'点此收起介绍':'点此展开介绍'}
     introToggle.onclick=()=>setIntro(!intro.classList.contains('is-open'));setIntro(false);
-    const imageDialog=$('image-dialog'),imageDialogImage=$('image-dialog-image'),imageDialogCaption=$('image-dialog-caption');let dialogControlsTimer;
-    function revealDialogControls(){clearTimeout(dialogControlsTimer);imageDialog.classList.add('is-controls-visible');if(imageDialog.open)dialogControlsTimer=setTimeout(()=>imageDialog.classList.remove('is-controls-visible'),2000)}
-    function closeImageDialog(){clearTimeout(dialogControlsTimer);imageDialog.classList.remove('is-controls-visible');imageDialog.close()}
-    function openImageDialog(card){imageDialogImage.src=card.dataset.imageFull;imageDialogImage.alt=card.querySelector('img').alt;const explanation=card.querySelector('.terrain-copy'),dialogTitle=card.dataset.imageDialogTitle;if(explanation){const copy=explanation.cloneNode(true);copy.querySelector('.terrain-toggle')?.remove();copy.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));imageDialogCaption.replaceChildren(copy)}else if(dialogTitle)imageDialogCaption.innerHTML=`<strong class="dialog-title">${dialogTitle}</strong><span class="dialog-subtitle">${card.dataset.imageSubtitle}</span>`;else imageDialogCaption.textContent=card.dataset.imageCaption;imageDialog.showModal();revealDialogControls()}
+    const imageDialog=$('image-dialog'),imageDialogImage=$('image-dialog-image'),imageDialogCaption=$('image-dialog-caption');
+    function closeImageDialog(){imageDialog.close()}
+    function openImageDialog(card){
+      imageDialogImage.src=card.dataset.imageFull;imageDialogImage.alt=card.querySelector('img').alt;
+      const explanation=card.querySelector('.terrain-copy');
+      if(explanation){
+        const copy=explanation.cloneNode(true);copy.querySelector('.terrain-toggle')?.remove();
+        copy.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));imageDialogCaption.replaceChildren(copy);
+      }else{
+        const title=document.createElement('h3');title.className='dialog-title';
+        title.textContent=card.dataset.imageDialogTitle||card.querySelector('h3')?.textContent||imageDialogImage.alt;
+        const description=document.createElement('p');description.className='dialog-subtitle';
+        description.textContent=card.dataset.imageSubtitle||card.dataset.imageCaption;
+        imageDialogCaption.replaceChildren(title,description);
+      }
+      imageDialog.showModal();imageDialogCaption.scrollTop=0;
+    }
     document.querySelectorAll('[data-image-full]').forEach(card=>{card.onclick=()=>openImageDialog(card);if(card.classList.contains('terrain-card')){card.tabIndex=0;card.addEventListener('keydown',e=>{if(e.target===card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openImageDialog(card)}})}});
     document.querySelectorAll('.terrain-grid .terrain-card').forEach((card,index)=>{
       const copy=card.querySelector('.terrain-copy'),paragraphs=copy.querySelectorAll(':scope > p');
@@ -47,6 +60,4 @@ const TAU=Math.PI*2,CYCLE=583.92,VR=.723,INC=3.394*Math.PI/180,NODE=1.34;
     });
     $('image-dialog-close').onclick=closeImageDialog;
     imageDialog.onclick=e=>{if(e.target===imageDialog)closeImageDialog()};
-    ['pointermove','wheel','keydown','touchstart'].forEach(type=>imageDialog.addEventListener(type,revealDialogControls,{passive:true}));
-    imageDialog.addEventListener('close',()=>{clearTimeout(dialogControlsTimer);imageDialog.classList.remove('is-controls-visible')});
     makeStatic();render();requestAnimationFrame(frame);

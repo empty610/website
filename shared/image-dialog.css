@@ -1,0 +1,57 @@
+/* Shared image and introduction view for the planetary pages. */
+.image-dialog {
+  box-sizing: border-box;
+  width: min(1440px, calc(100% - 32px));
+  max-width: none;
+  height: min(88dvh, 880px);
+  max-height: none;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #d4c8b4;
+  border-radius: 24px;
+  background: #23211c;
+  color: #776b58;
+  box-shadow: 0 24px 80px #0006;
+}
+.image-dialog::backdrop { background: #29251fba; backdrop-filter: blur(6px); }
+.image-dialog > figure { display: grid; grid-template-columns: minmax(0, 54fr) minmax(0, 46fr); height: 100%; margin: 0; }
+.image-dialog #image-dialog-image { display: block; width: 100%; height: 100%; min-width: 0; min-height: 0; max-height: none; object-fit: contain; background: #23211c; }
+.image-dialog #image-dialog-caption {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 76px 40px 40px;
+  background: #f7f2e8;
+  color: #776b58;
+  font-size: 15px;
+  line-height: 2.1;
+  scrollbar-width: thin;
+  scrollbar-color: #b9ad98 transparent;
+}
+.image-dialog :is(.terrain-copy, .landform-dialog-copy) { width: 100%; padding: 0; }
+.image-dialog :is(.terrain-kicker, .dialog-kicker) { display: block; margin: 0 0 22px; color: #8c7f6d; font: 10px var(--mono); letter-spacing: .16em; line-height: 1.8; }
+.image-dialog :is(.terrain-copy h3, .dialog-title) { display: block; margin: 0 0 30px; color: #342e24; font-size: clamp(24px, 2.2vw, 34px); font-weight: 700; line-height: 1.4; letter-spacing: 0; }
+.image-dialog :is(.terrain-copy p, .landform-dialog-copy p, .dialog-subtitle) { display: block; min-height: 0; margin: 0 0 20px; color: #776b58; font-size: 15px; line-height: 2.1; }
+.image-dialog :is(.terrain-source, .landform-dialog-source) { display: block; margin-top: 28px; color: #8c7f6d; font: inherit; font-size: 12px; letter-spacing: 0; line-height: 1.9; text-transform: none; overflow-wrap: anywhere; }
+.image-dialog a { color: var(--gold); text-underline-offset: 5px; }
+.image-dialog .image-dialog-close {
+  position: absolute; top: 16px; right: 16px; z-index: 2;
+  display: grid; place-items: center; width: 46px; height: 46px;
+  margin: 0; padding: 0; border: 1px solid #8c806b; border-radius: 50%;
+  background: #423d32; color: #f7f2e8; font-size: 28px; line-height: 1; cursor: pointer;
+}
+.image-dialog-close:hover { background: #5b5142; }
+.image-dialog-close:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+@media (max-width: 920px) and (min-width: 761px) {
+  .image-dialog #image-dialog-caption { padding: 76px 26px 28px; }
+}
+@media (max-width: 760px) {
+  .image-dialog { width: calc(100% - 20px); height: 92dvh; border-radius: 18px; }
+  .image-dialog > figure { grid-template-columns: minmax(0, 1fr); grid-template-rows: 38% minmax(0, 1fr); }
+  .image-dialog #image-dialog-caption { padding: 24px 22px 28px; }
+  .image-dialog :is(.terrain-kicker, .dialog-kicker) { margin-bottom: 12px; }
+  .image-dialog :is(.terrain-copy h3, .dialog-title) { margin-bottom: 20px; font-size: 23px; }
+  .image-dialog :is(.terrain-copy p, .landform-dialog-copy p, .dialog-subtitle) { font-size: 14px; line-height: 1.9; }
+  .image-dialog .image-dialog-close { top: 10px; right: 10px; width: 44px; height: 44px; }
+}

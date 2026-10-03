@@ -6,8 +6,9 @@
   <meta name="description" content="交互探索金星的日心轨道、晨昏星变化、相位、视星等与视直径。">
   <title>Venus · empty610.com</title>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-src 'none'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; style-src-elem 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self'; connect-src 'self'; worker-src 'none'; manifest-src 'self'; form-action 'none'; upgrade-insecure-requests" />
-  <link rel="stylesheet" href="venus.css?v=20261002-model-controls" />
+  <link rel="stylesheet" href="venus.css?v=20261003-split-dialog" />
   <link rel="stylesheet" href="site.css?v=20260916-music-idle" />
+  <link rel="stylesheet" href="../shared/image-dialog.css?v=20261003-split" />
 <!--这里的东西写得不一定准确，大部份资料来自NASA，我使用Deepseek和ChatGPT补全了一部分内容并完成了标签的搭建，如有错误欢迎指点-->
 </head>
 <body data-page="venus">
@@ -124,7 +125,7 @@
     <button class="image-dialog-close" id="image-dialog-close" type="button" aria-label="关闭图片预览">×</button>
     <figure><img id="image-dialog-image" src="" alt=""><figcaption id="image-dialog-caption"></figcaption></figure>
   </dialog>
-  <script src="venus.js?v=20260926-orbit-sun" defer></script>
+  <script src="venus.js?v=20261003-split-dialog" defer></script>
   <script src="../shared/idle-controls.js?v=20260910" defer></script>
   <script type="module" src="page.js?v=20261002-model-controls"></script>
   <audio id="bg-music" src="../shared/audio/ad%20astra.mp3" loop preload="none" hidden></audio>

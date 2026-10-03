@@ -256,37 +256,6 @@
     .appearance-copy p { min-height: 34px; margin: 6px 0 0; color: var(--muted); font-size: 11px; line-height: 1.55; }
     .appearance-source { display: block; margin-top: 10px; color: #a29482; font: 700 7px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
 
-    .image-dialog {
-      width: min(980px, calc(100% - 28px));
-      max-width: none;
-      max-height: min(92vh, 860px);
-      padding: 0;
-      overflow-x: hidden;
-      overflow-y: auto;
-      overscroll-behavior: contain;
-      border: 1px solid rgba(236, 213, 166, .42);
-      border-radius: 16px;
-      background: #17130f;
-      color: #f8f0df;
-      box-shadow: 0 24px 80px rgba(0, 0, 0, .5);
-    }
-
-    .image-dialog::backdrop { background: rgba(25, 20, 15, .72); backdrop-filter: blur(4px); }
-    .image-dialog figure { margin: 0; }
-    .image-dialog img { display: block; width: 100%; max-height: calc(88vh - 72px); object-fit: contain; background: #090806; }
-    .image-dialog figcaption { padding: 13px 58px 14px 16px; color: #e8dcc7; font-size: 12px; line-height: 1.5; }
-    .landform-dialog-copy { width: 100%; }
-    .landform-dialog-copy p { margin: 0 0 10px; line-height: 1.75; }
-    .landform-dialog-copy p:last-child { margin-bottom: 0; }
-    .landform-dialog-source { color: #c8ad81; font-size: 11px; }
-    .image-dialog .terrain-copy { padding: 0; }
-    .image-dialog .terrain-copy h3 { color: #fff4df; font-size: 15px; }
-    .image-dialog .terrain-copy p { min-height: 0; color: #e8dcc7; font-size: 12px; }
-    .image-dialog .terrain-kicker, .image-dialog .terrain-source { color: #d9b85b; }
-    .image-dialog-close { position: sticky; top: 10px; display: block; width: 34px; height: 34px; margin: 10px 10px -44px auto; z-index: 2; border: 1px solid rgba(255, 255, 255, .35); border-radius: 50%; background: rgba(20, 17, 13, .72); color: #fff8e9; font-size: 21px; line-height: 1; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity .32s ease; }
-    .image-dialog.is-controls-visible .image-dialog-close { opacity: 1; pointer-events: auto; }
-    .image-dialog-close:hover, .image-dialog-close:focus-visible { border-color: var(--gold); color: #ffe7ae; outline: none; }
-
     .surface-panel { margin-bottom: 16px; }
 
     .terrain-grid {
@@ -975,7 +944,6 @@
     .planet-fallback img { max-width:100%; max-height:300px; border-radius:12px; }
     .terrain-card[data-image-full="assets/polar.jpg"] img { object-fit:contain; background:#f1eadf; }
     .planet-stage.is-error #mars-3d { display:none; }
-    .image-dialog-close { opacity:1 !important; pointer-events:auto !important; }
     .terrain-source { line-height:1.6; }
     .sky-stage { background:linear-gradient(rgba(18,23,29,.75),rgba(18,23,29,.8)),url('../venus/milky-way-2mass.jpg') center/cover; }
     #sky-status { fill:#f1b783; }

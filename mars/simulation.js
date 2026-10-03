@@ -83,11 +83,15 @@
   const intro=$('mars-intro'),introToggle=$('intro-toggle');
   introToggle.onclick=()=>{const open=!intro.classList.contains('is-open');intro.classList.toggle('is-open',open);introToggle.setAttribute('aria-expanded',String(open));$('mars-intro-content').hidden=!open;introToggle.querySelector('.intro-mark').textContent=open?'−':'＋'};
   const dialog=$('image-dialog'),dialogImage=$('image-dialog-image'),caption=$('image-dialog-caption');
-  function formatLandformCaption(text) {
+  function formatLandformCaption(card) {
+    const text=card.dataset.imageCaption;
     const sourceStart=text.lastIndexOf(' 来源：');
     const description=sourceStart<0?text:text.slice(0,sourceStart);
     const sentences=description.match(/[^。！？]+[。！？]?/g)||[description];
     const content=document.createElement('div');content.className='landform-dialog-copy';
+    const title=document.createElement('h3');title.className='dialog-title';
+    title.textContent=card.querySelector('h3')?.textContent||card.querySelector('img').alt;
+    content.append(title);
     for(let i=0;i<sentences.length;i+=2){
       const paragraph=document.createElement('p');
       paragraph.textContent=sentences.slice(i,i+2).join('').trim();
@@ -99,7 +103,15 @@
     }
     caption.replaceChildren(content);
   }
-  function openImage(card) { dialogImage.src=card.dataset.imageFull;dialogImage.alt=card.querySelector('img').alt;const copy=card.querySelector('.terrain-copy');if(copy){const fullCopy=copy.cloneNode(true);fullCopy.querySelector('.terrain-toggle')?.remove();fullCopy.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));caption.replaceChildren(fullCopy)}else formatLandformCaption(card.dataset.imageCaption);dialog.showModal();dialog.classList.add('is-controls-visible'); }
+  function openImage(card) {
+    dialogImage.src=card.dataset.imageFull;dialogImage.alt=card.querySelector('img').alt;
+    const copy=card.querySelector('.terrain-copy');
+    if(copy){
+      const fullCopy=copy.cloneNode(true);fullCopy.querySelector('.terrain-toggle')?.remove();
+      fullCopy.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));caption.replaceChildren(fullCopy);
+    }else formatLandformCaption(card);
+    dialog.showModal();caption.scrollTop=0;dialog.classList.add('is-controls-visible');
+  }
   document.querySelectorAll('[data-image-full]').forEach(card=>{card.onclick=e=>{if(!e.target.closest('a'))openImage(card)};if(card.classList.contains('terrain-card')){card.tabIndex=0;card.setAttribute('role','button');card.addEventListener('keydown',e=>{if(e.target===card && (e.key==='Enter'||e.key===' ')){e.preventDefault();openImage(card)}})}});
   document.querySelectorAll('.terrain-grid .terrain-card').forEach((card,index)=>{
     const copy=card.querySelector('.terrain-copy'),paragraphs=copy.querySelectorAll(':scope > p');
