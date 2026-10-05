@@ -5,7 +5,7 @@
   const main = document.getElementById('main');
   const links = Array.from(menu.querySelectorAll('nav a'));
   const sections = links.map(link => document.getElementById(link.hash.slice(1)));
-  const darkSectionIds = new Set(['dc', 'venus', 'mars']);
+  const darkSectionIds = new Set(['dc', 'projects']);
   const backgroundSections = Array.from(main.querySelectorAll('section[id]'));
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let idleTimer;
@@ -40,11 +40,6 @@
       const box = section.getBoundingClientRect();
       if (box.top <= point && box.bottom > point) current = i;
     });
-    const mars = document.getElementById('mars');
-    if (mars) {
-      const box = mars.getBoundingClientRect();
-      if (box.top <= point && box.bottom > point) current = links.findIndex(link => link.hash === '#venus');
-    }
     // The last section can be shorter than a viewport and cannot scroll to the top.
     if (scrollY + innerHeight >= document.documentElement.scrollHeight - 4) current = sections.length - 1;
     links.forEach((link, i) => {

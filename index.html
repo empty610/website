@@ -9,7 +9,7 @@
   <link rel="preload" href="shared/fonts/ITCAvantGardePro-Bold.woff2" as="font" type="font/woff2" crossorigin />
 
   <!-- 孤星同款advant garde居然要钱，太痛苦了。还有，看得开心 =-) -->
-  <link rel="stylesheet" href="home/home.css?v=20261002-scroll-cue" />
+  <link rel="stylesheet" href="home/home.css?v=20261005-solar-lab" />
 </head>
 <body>
   <div id="app" class="board">
@@ -86,41 +86,44 @@
         </div>
       </section>
 
-      <!-- 金星入口 -->
-      <section id="venus" class="venus-preview reveal-fade" tabindex="-1" aria-labelledby="venus-title">
-        <div class="venus-preview-copy">
-          <p class="venus-eyebrow">SOLAR LABORATORY / 02</p>
-          <h2 id="venus-title">VENUS<span>金星</span></h2>
-          <p class="venus-preview-description">自太阳系宜居带诞生的金色炼狱。<br>A golden world of extremes born from the habitable zone.</p>
-          <a class="enter-btn" id="go-venus" href="./venus/" data-transition-label="VENUS // ESTABLISHING LINK"><span>EXPLORE VENUS</span><span aria-hidden="true">↗</span></a>
+      <!-- 项目：太阳系内容统一进入独立的 Solar Lab。 -->
+      <section id="projects" class="solar-preview reveal-fade" tabindex="-1" aria-labelledby="solar-title">
+        <div class="solar-preview-copy">
+          <p class="solar-eyebrow"><span class="solar-index">01</span> PROJECTS / ASTRONOMY</p>
+          <h2 id="solar-title">SOLAR<br>LAB<span>太阳系实验室</span></h2>
+          <p class="solar-preview-description">从一颗恒星出发，走近每一个不同的世界。</p>
+          <p class="solar-preview-note" lang="en">A field guide to our cosmic neighbourhood.</p>
+          <a class="enter-btn" id="go-solar-lab" href="https://solar.empty610.com/" data-transition-label="SOLAR LAB // ESTABLISHING LINK"><span>EXPLORE SOLAR LAB</span><span class="btn-arrow" aria-hidden="true">↗</span></a>
         </div>
-        <div class="venus-preview-stage" id="venus-preview-stage" role="img" aria-label="缓慢旋转的金星雷达地表模型">
-          <div id="venus-preview-canvas"></div>
-          <span class="venus-preview-fallback">金星预览暂不可用，可进入其他项目继续探索。</span>
+        <div class="solar-preview-stage" role="img" aria-label="太阳、木星、土星、火星与海王星组成的太阳系轨道示意">
+          <div class="solar-orrery" aria-hidden="true">
+            <svg class="solar-orbits" viewBox="0 0 760 760" fill="none">
+              <g transform="rotate(-25 380 380)">
+                <ellipse cx="380" cy="380" rx="116" ry="73" />
+                <ellipse cx="380" cy="380" rx="210" ry="131" />
+                <ellipse cx="380" cy="380" rx="292" ry="184" />
+                <ellipse cx="380" cy="380" rx="357" ry="228" />
+              </g>
+              <circle class="solar-registration" cx="380" cy="380" r="355" />
+              <path class="solar-crosshair" d="M380 12v28m0 680v28M12 380h28m680 0h28" />
+            </svg>
+            <span class="solar-sun"></span>
+            <span class="solar-body solar-jupiter"><img src="home/assets/solar-jupiter.png" width="640" height="640" alt="" loading="lazy" decoding="async"><span>JUPITER</span></span>
+            <span class="solar-body solar-saturn"><img src="home/assets/solar-saturn.png" width="640" height="640" alt="" loading="lazy" decoding="async"><span>SATURN</span></span>
+            <span class="solar-body solar-mars"><img src="home/assets/solar-mars.png" width="640" height="640" alt="" loading="lazy" decoding="async"><span>MARS</span></span>
+            <span class="solar-body solar-neptune"><img src="home/assets/solar-neptune.png" width="640" height="640" alt="" loading="lazy" decoding="async"><span>NEPTUNE</span></span>
+            <span class="solar-sun-label">SOL / 01</span>
+          </div>
         </div>
-        <div class="venus-preview-caption"><span>MAGELLAN RADAR SURFACE</span><span>VENUS PREVIEW · 02</span></div>
-      </section>
-
-      <section id="mars" class="mars-preview reveal-fade" tabindex="-1" aria-labelledby="mars-title">
-        <div class="mars-preview-copy">
-          <p class="mars-eyebrow">SOLAR LABORATORY / 03</p>
-          <h2 id="mars-title">MARS<span>火星</span></h2>
-          <p class="mars-preview-description">或许曾拥有奕奕生机的红色荒原。<br>A red wastedland that perhaps once had radiant life.</p>
-          <a class="enter-btn" id="go-mars" href="./mars/" data-transition-label="MARS // ESTABLISHING LINK"><span>EXPLORE MARS</span><span aria-hidden="true">↗</span></a>
-        </div>
-        <div class="mars-preview-stage" id="mars-preview-stage" role="img" aria-label="缓慢旋转的火星地表模型">
-          <div id="mars-preview-canvas"></div>
-          <span class="mars-preview-fallback">火星预览暂不可用，可进入项目继续探索。</span>
-        </div>
-        <div class="mars-preview-caption"><span>MARS GLOBAL SURFACE</span><span>MARS PREVIEW · 03</span></div>
+        <div class="solar-preview-caption"><span>ONE STAR. MANY WORLDS.</span><span>SOLAR SYSTEM / EXPLORATION ATLAS</span></div>
       </section>
 
       <!-- 未来 -->
       <section class="section future reveal-fade">
         <h2 class="future-title">未来呢？</h2>
-        <p class="future-sub"><b>这里暂时没有更多的内容。</b></p>
+        <p class="future-sub"><b>下一次探索，仍在路上。</b></p>
         <!-- 我会尽快补充内容，如果我真的能补上我自己给自己画的大饼（躺）-->
-        <p class="future-body">或许我会在不久之后实装一些项目在这，这会包括一个能帮助你了解太阳系的模型，以及针对太阳系各大行星的介绍，现在已经做了金星与火星，我正在思考是否要新建一个站点专门存放它。你或许可以从这里了解到人类对太阳系各大行星的探索程度与主要的科研成果。但至少现在，这里还什么都没有。</p>
+        <p class="future-body">太阳系的星图、天体模型与探索档案，现在都收录在 Solar Lab 中。我会继续完善它，也期待在这里分享新的项目与想法。</p>
         <p class="future-body">在此，再次感谢你观看我的网站，并祝愿你看得开心。如果你能在我的编辑的内容中获得一些对你有用的东西，我不胜荣幸。</p>
       </section>
 
@@ -167,7 +170,7 @@
         <ol class="navigation-links">
           <li><a href="#about"><span class="navigation-number" aria-hidden="true">01</span><span class="navigation-label">关于<small lang="en">ABOUT</small></span><span class="navigation-arrow" aria-hidden="true">↗</span></a></li>
           <li><a href="#dc"><span class="navigation-number" aria-hidden="true">02</span><span class="navigation-label">系统作品<small lang="en">SYSTEM WORKS / DC</small></span><span class="navigation-arrow" aria-hidden="true">↗</span></a></li>
-          <li><a href="#venus"><span class="navigation-number" aria-hidden="true">03</span><span class="navigation-label">项目<small lang="en">PROJECTS</small></span><span class="navigation-arrow" aria-hidden="true">↗</span></a></li>
+          <li><a href="#projects"><span class="navigation-number" aria-hidden="true">03</span><span class="navigation-label">项目<small lang="en">PROJECTS</small></span><span class="navigation-arrow" aria-hidden="true">↗</span></a></li>
           <li><a href="#contact"><span class="navigation-number" aria-hidden="true">04</span><span class="navigation-label">联系<small lang="en">CONTACT</small></span><span class="navigation-arrow" aria-hidden="true">↗</span></a></li>
         </ol>
       </nav>
@@ -194,11 +197,9 @@
   </button>
 
   <script src="shared/music.js?v=20260907" defer></script>
-  <script src="home/app.js?v=20261002-scroll-cue" defer></script>
+  <script src="home/app.js?v=20261005-solar-lab" defer></script>
   <script src="shared/idle-controls.js?v=20260910" defer></script>
-  <script src="home/navigation.js?v=20260923-mars" defer></script>
-  <script type="module" src="home/venus-preview.js?v=20261002-model-controls"></script>
-  <script type="module" src="home/mars-preview.js?v=20261002-model-controls"></script>
+  <script src="home/navigation.js?v=20261005-solar-lab" defer></script>
 
 </body>
 </html>

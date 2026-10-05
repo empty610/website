@@ -22,7 +22,8 @@ function finish() {
   app.classList.add('is-ready');
   loading.classList.add('is-done');
   setupReveal();
-  if (['#about', '#dc', '#venus', '#mars', '#contact'].includes(location.hash)) {
+  if (['#venus', '#mars', '#solar-lab'].includes(location.hash)) history.replaceState(null, '', '#projects');
+  if (['#about', '#dc', '#projects', '#contact'].includes(location.hash)) {
     const target = document.getElementById(location.hash.slice(1));
     target?.scrollIntoView({ behavior: 'instant', block: 'start' });
     // The browser may process the fragment while the main content is still
@@ -94,7 +95,7 @@ function setupScrollFade() {
   if (!els.length) return;
   const hero = document.querySelector('.hero');
   const scrollCue = hero?.querySelector('.scroll-cue');
-  const deepLinked = ['#about', '#dc', '#venus', '#mars', '#contact'].includes(location.hash);
+  const deepLinked = ['#about', '#dc', '#projects', '#contact'].includes(location.hash);
   let waitingForInitialAnchor = deepLinked;
   let dismissedByClick = false;
 
@@ -221,13 +222,11 @@ window.siteLoader = { setProgress, finish };
 // Directory URLs are canonical on the website; file previews need an HTML file.
 if (location.protocol === 'file:') {
   document.getElementById('go-terminal').href = './delocalized%20configuration%20project/index.html';
-  document.getElementById('go-venus').href = './venus/index.html';
-  document.getElementById('go-mars').href = './mars/index.html';
 }
 
 // DC 是一个独立页面。点击入口时先显示极短的传输过渡，避免页面直接切换；
 // 修饰键/非主键点击保留浏览器原生的新标签页和菜单行为。
-const projectLinks = document.querySelectorAll('#go-terminal, #go-venus, #go-mars');
+const projectLinks = document.querySelectorAll('#go-terminal, #go-solar-lab');
 const dcPageTransition = document.getElementById('dc-page-transition');
 if (projectLinks.length && dcPageTransition) {
   let dcNavigationPending = false;
@@ -250,6 +249,7 @@ if (projectLinks.length && dcPageTransition) {
 
     window.requestAnimationFrame(() => {
       window.requestAnimationFrame(() => {
+        if (!dcNavigationPending) return;
         dcPageTransition.classList.add('is-active');
         window.setTimeout(() => {
           window.location.assign(projectLink.href);
@@ -259,7 +259,8 @@ if (projectLinks.length && dcPageTransition) {
   }));
 
   // 恢复前进/后退缓存页面时确保遮罩不会残留。
-  window.addEventListener('pageshow', () => {
+  window.addEventListener('pageshow', (event) => {
+    if (!event.persisted) return;
     dcNavigationPending = false;
     dcPageTransition.classList.remove('is-mounted');
     dcPageTransition.classList.remove('is-active');
