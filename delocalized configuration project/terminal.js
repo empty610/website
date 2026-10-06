@@ -176,6 +176,7 @@
         // ---------- 3D 场景（保持不变） ----------
         async function startApp() {
             await loadThree();
+            const { createDCEarth, addEarthLighting, EARTH_SPIN } = await import('./earth-model.js?v=20261007');
             wrapper.classList.remove('is-model-ready');
             const scene = new THREE.Scene();
             scene.background = new THREE.Color('#ece6dc');
@@ -205,41 +206,19 @@
             controls.target.set(0, 0, 0);
             controls.update();
 
-            scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-            const sun = new THREE.DirectionalLight(0xffeedd, 2.2);
-            sun.position.set(8, 6, 5);
-            scene.add(sun);
-            const fill = new THREE.DirectionalLight(0xccddff, 0.6);
-            fill.position.set(-4, -2, -6);
-            scene.add(fill);
-            const rim = new THREE.DirectionalLight(0xffeeee, 0.7);
-            rim.position.set(-3, 5, -4);
-            scene.add(rim);
-
-            const earthGroup = new THREE.Group();
-            scene.add(earthGroup);
-            const radius = 1.25;
+            addEarthLighting(THREE, scene);
             const textureUrl = location.protocol === 'file:'
                 ? globalThis.EARTH_TEXTURE_DATA_URL
                 : 'assets/textures/earth_atmos_2048.jpg';
             let earthTextureReady = false;
-            const tex = new THREE.TextureLoader().load(
+            const { earthGroup, earth } = createDCEarth(
+                THREE,
                 textureUrl,
                 () => { earthTextureReady = true; },
-                undefined,
                 () => { earthTextureReady = false; }
             );
-            const earth = new THREE.Mesh(
-                new THREE.SphereGeometry(radius, 64, 64),
-                new THREE.MeshStandardMaterial({ map: tex, roughness: 0.45, metalness: 0.08 })
-            );
-            earthGroup.add(earth);
-            earthGroup.add(new THREE.Mesh(
-                new THREE.SphereGeometry(radius * 1.015, 48, 48),
-                new THREE.MeshBasicMaterial({ color: 0x8a9bb5, transparent: true, opacity: 0.09, side: THREE.BackSide })
-            ));
+            scene.add(earthGroup);
             // 地球自转（受 Rotation Speed 档位控制；单位：1x 时每秒自转弧度）
-            const EARTH_SPIN = 0.15;
 
             function createOrbitLine(a, b, inclDeg, color, opacity = 0.5) {
                 const g = new THREE.Group();
