@@ -37,8 +37,8 @@
 .solar-orrery { position: absolute; inset: 0; display: grid; place-items: center; }
 .solar-orbits { position: absolute; width: 112%; height: 112%; stroke: #b8943840; stroke-width: .8; }
 .solar-orbits ellipse + ellipse { stroke: #b8943820; }
-.solar-body { position: absolute; width: min(130%, 100svh); }
-.solar-body img { display: block; width: 100%; height: auto; filter: sepia(.15) saturate(.85); }
+.solar-body { position: absolute; width: min(100%, 76svh); }
+.solar-body img { display: block; width: 100%; height: auto; }
 .solar-preview-caption { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 20px; padding-top: 15px; border-top: 1px solid #b8943833; color: #9c886b; font-size: 9px; letter-spacing: .17em; }
 .js .solar-preview-copy > *, .js .solar-preview-stage { opacity: 0; }
 .solar-preview.enter .solar-eyebrow, .solar-preview.enter #solar-title { animation: sec-text-in 1.2s ease forwards; }
@@ -55,7 +55,7 @@
   .solar-preview-description { margin-top: 20px; font-size: 12px; line-height: 1.9; }
   .solar-preview-note { font-size: 11px; }
   .solar-preview .enter-btn { margin-top: 22px; padding: 13px 20px; font-size: 10px; }
-  .solar-body { width: min(118%, 68svh); }
+  .solar-body { width: min(94%, 45svh); }
   .solar-preview-caption { font-size: 7px; padding-top: 10px; gap: 8px; }
 }
 @media (max-height: 600px) and (min-width: 641px) {
