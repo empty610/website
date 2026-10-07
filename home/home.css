@@ -859,7 +859,7 @@ html:not(.js) .scroll-cue {
   .scroll-cue-text { font-size: 0.78rem; letter-spacing: 0.12em; }
 }
 
-/* Venus entry template: warm black, gold, one celestial subject. */
+/* Venus entry template: warm black and gold, with an open right column. */
 .solar-preview {
   position: relative;
   isolation: isolate;
@@ -893,25 +893,13 @@ html:not(.js) .scroll-cue {
 .solar-preview-description { margin: 32px 0 0; color: #baac97; font-size: 14px; line-height: 2; }
 .solar-preview-note { margin: 8px 0 0; max-width: 35ch; color: #9c886b; font-size: 12px; line-height: 1.8; }
 .solar-preview .enter-btn { margin-top: 36px; padding: 15px 26px; font-size: 12px; letter-spacing: .1em; }
-/* Art fills the available space without contributing a square intrinsic height. */
+/* Keep the right column empty and preserve the caption's separate row. */
 .solar-preview-stage { position: relative; min-width: 0; min-height: 0; pointer-events: none; }
-.solar-orrery { position: absolute; inset: 0; display: grid; place-items: center; }
-.solar-orbits { position: absolute; width: 112%; height: 112%; stroke: #b8943840; stroke-width: .8; }
-.solar-orbits ellipse + ellipse { stroke: #b8943820; }
-.solar-body { position: absolute; width: min(100%, 76svh); aspect-ratio: 1; }
-.solar-body img { display: block; width: 100%; height: auto; }
-.solar-earth-fallback { transition: opacity .45s ease, visibility 0s linear .45s; }
-#solar-earth-canvas { position: absolute; inset: 0; opacity: 0; visibility: hidden; transition: opacity .45s ease; }
-#solar-earth-canvas canvas { display: block; width: 100%; height: 100%; }
-.solar-preview-stage.is-ready #solar-earth-canvas { opacity: 1; visibility: visible; }
-.solar-preview-stage.is-ready .solar-earth-fallback { opacity: 0; visibility: hidden; }
 .solar-preview-caption { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 20px; padding-top: 15px; border-top: 1px solid #b8943833; color: #9c886b; font-size: 9px; letter-spacing: .17em; }
-.js .solar-preview-copy > *, .js .solar-preview-stage { opacity: 0; }
+.js .solar-preview-copy > * { opacity: 0; }
 .solar-preview.enter .solar-eyebrow, .solar-preview.enter #solar-title { animation: sec-text-in 1.2s ease forwards; }
 .solar-preview.enter .solar-preview-description, .solar-preview.enter .solar-preview-note { animation: sec-text-in 1.2s .12s ease forwards; }
 .solar-preview.enter .enter-btn { animation: sec-text-in 1.2s .24s ease forwards; }
-.solar-preview.enter .solar-preview-stage { animation: solar-art-in 1.2s .12s ease forwards; }
-@keyframes solar-art-in { from { opacity: 0; } to { opacity: 1; } }
 @media (max-width: 640px) {
   .solar-preview { min-height: 620px; padding: clamp(24px, 5svh, 44px) 7vw 16px; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; gap: 24px; }
   .solar-preview-copy { align-self: start; }
@@ -921,7 +909,6 @@ html:not(.js) .scroll-cue {
   .solar-preview-description { margin-top: 20px; font-size: 12px; line-height: 1.9; }
   .solar-preview-note { font-size: 11px; }
   .solar-preview .enter-btn { margin-top: 22px; padding: 13px 20px; font-size: 10px; }
-  .solar-body { width: min(94%, 45svh); }
   .solar-preview-caption { font-size: 7px; padding-top: 10px; gap: 8px; }
 }
 @media (max-height: 600px) and (min-width: 641px) {
@@ -935,7 +922,7 @@ html:not(.js) .scroll-cue {
   .solar-preview-caption { font-size: 7px; padding-top: 9px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .js .solar-preview .solar-preview-copy > *, .js .solar-preview .solar-preview-stage { opacity: 1; animation: none; }
+  .js .solar-preview .solar-preview-copy > * { opacity: 1; animation: none; }
 }
 
 /* Full-screen index, in the same warm paper and muted gold as the main site. */
