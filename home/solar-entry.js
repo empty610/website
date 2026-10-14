@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const section = document.getElementById('projects');
-  const chart = document.getElementById('solar-motion-toggle');
+  const chart = document.getElementById('solar-orbital-art');
   if (!section || !chart) return;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const planets = [...section.querySelectorAll('[data-orbit]')].map(node => ({
@@ -19,7 +19,7 @@
     label: node.querySelector('.solar-planet-label'),
     leader: node.querySelector('.solar-leader')
   }));
-  let playing = !reduced.matches, visible = false, frame = 0, previous = 0, lastPaint = 0;
+  let visible = false, frame = 0, previous = 0, lastPaint = 0;
   const tilt = -24 * Math.PI / 180, cos = Math.cos(tilt), sin = Math.sin(tilt);
   const flattening = .49, depth = Math.sqrt(1 - flattening * flattening);
   function render(delta) {
@@ -58,7 +58,7 @@
     }
   }
   function canRun() {
-    return playing && visible && !document.hidden && !document.documentElement.classList.contains('dc-navigation-active');
+    return !reduced.matches && visible && !document.hidden && !document.documentElement.classList.contains('dc-navigation-active');
   }
   function tick(now) {
     frame = 0;
@@ -72,19 +72,10 @@
   }
   function update() {
     cancelAnimationFrame(frame); frame = 0; previous = 0; lastPaint = 0;
-    chart.setAttribute('aria-pressed', String(playing));
-    chart.setAttribute('aria-label', playing ? '暂停行星公转动画' : '播放行星公转动画');
     section.dataset.motion = canRun() ? 'running' : 'paused';
     if (canRun()) frame = requestAnimationFrame(tick);
   }
-  function toggle() { playing = !playing; update(); }
-  chart.addEventListener('click', toggle);
-  chart.addEventListener('keydown', event => {
-    if ((event.key === ' ' || event.key === 'Enter') && !event.repeat) {
-      event.preventDefault(); toggle();
-    }
-  });
-  reduced.addEventListener('change', () => { playing = !reduced.matches; update(); });
+  reduced.addEventListener('change', update);
   new IntersectionObserver(entries => {
     visible = entries[0].isIntersecting; update();
   }, { threshold: 0 }).observe(section);

@@ -926,7 +926,7 @@ html:not(.js) .scroll-cue {
   margin: 0;
   padding: 14px 16px 14px 22px;
   border: 1px solid #b3a07c80;
-  border-radius: 3px;
+  border-radius: 999px;
   color: #e9dcc1;
   background: #d6bb7a09;
   box-shadow: none;
@@ -935,10 +935,12 @@ html:not(.js) .scroll-cue {
 }
 .solar-button-copy { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; font-size: 14px; font-weight: 400; letter-spacing: .08em; }
 .solar-button-copy small { color: #aaa08c; font: 8px/1 Consolas, monospace; letter-spacing: .16em; }
-.solar-preview .enter-btn .btn-arrow { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid #c3ae8147; border-radius: 50%; font: 22px/1 var(--font); transition: transform .4s cubic-bezier(.22, 1, .36, 1), background .3s ease; }
+.solar-preview .enter-btn .btn-arrow { display: grid; place-items: center; flex: 0 0 36px; width: 36px; height: 36px; border: 1px solid #c3ae8147; border-radius: 50%; line-height: 0; transform: none; transition: background .3s ease; }
+.solar-preview .enter-btn .btn-arrow svg { display: block; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; transition: transform .3s ease; }
 .solar-preview .enter-btn:hover { transform: none; background: #d1b78217; border-color: #d9c195; }
-.solar-preview .enter-btn:hover .btn-arrow { transform: rotate(45deg); background: #dbc79414; }
-.solar-preview .enter-btn:focus-visible, #solar-motion-toggle:focus-visible { outline: 2px solid #efd59c; outline-offset: 6px; }
+.solar-preview .enter-btn:hover .btn-arrow { background: #dbc79414; }
+.solar-preview .enter-btn:hover .btn-arrow svg { transform: translate(1px, -1px); }
+.solar-preview .enter-btn:focus-visible { outline: 2px solid #efd59c; outline-offset: 6px; }
 .solar-preview-stage { position: relative; align-self: center; min-width: 0; width: calc(100% + 2vw); margin: 0 0 0 -2vw; }
 .solar-map-heading { position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: center; gap: 14px; color: #99917e; font: 8px/1.6 Consolas, monospace; letter-spacing: .1em; }
 .solar-map-heading { margin: 0 22px; padding-bottom: 12px; border-bottom: 1px solid var(--solar-hairline); }
@@ -1009,11 +1011,10 @@ html:not(.js) .scroll-cue {
 @media (prefers-reduced-motion: reduce) {
   .js .solar-preview .solar-preview-copy > *, .js .solar-preview-stage, .js .solar-preview-top, .js .solar-preview-caption { opacity: 1; animation: none; transform: none; }
   .js .solar-orbit { stroke-dashoffset: 0; transition: none; }
-  .solar-preview .enter-btn, .solar-preview .enter-btn .btn-arrow { transition: none; }
+  .solar-preview .enter-btn, .solar-preview .enter-btn .btn-arrow, .solar-preview .enter-btn .btn-arrow svg { transition: none; }
+  .solar-preview .enter-btn:hover .btn-arrow svg { transform: none; }
 }
 
-/* The chart itself is the unobtrusive playback control. */
-.solar-preview-stage[role="button"] { cursor: pointer; -webkit-tap-highlight-color: transparent; border-radius: 3px; }
 .solar-ring-back { opacity: .48; }
 .solar-ring-front { opacity: .88; }
 .solar-planet { will-change: transform; }
