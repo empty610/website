@@ -9,7 +9,7 @@
   <link rel="preload" href="shared/fonts/ITCAvantGardePro-Bold.woff2" as="font" type="font/woff2" crossorigin />
 
   <!-- 孤星同款advant garde居然要钱，太痛苦了。还有，看得开心 =-) -->
-  <link rel="stylesheet" href="home/home.css?v=20261007-solar-open" />
+  <link rel="stylesheet" href="home/home.css?v=20261014-solar-motion" />
 </head>
 <body>
   <div id="app" class="board">
@@ -88,15 +88,101 @@
 
       <!-- 项目：太阳系内容统一进入独立的 Solar Lab。 -->
       <section id="projects" class="solar-preview reveal-fade" tabindex="-1" aria-labelledby="solar-title">
+        <div class="solar-preview-top"><p class="solar-eyebrow">PROJECTS / ASTRONOMY</p><span class="solar-edition">EMPTY610 — EXPLORATION ATLAS</span></div>
         <div class="solar-preview-copy">
-          <p class="solar-eyebrow">PROJECTS / ASTRONOMY</p>
-          <h2 id="solar-title">SOLAR LAB<span>太阳系实验室</span></h2>
-          <p class="solar-preview-description">从一颗恒星出发，走近每一个不同的世界。</p>
-          <p class="solar-preview-note" lang="en">A field guide to our cosmic neighbourhood.</p>
-          <a class="enter-btn" id="go-solar-lab" href="https://solar.empty610.com/terminal/" data-transition-label="SOLAR LAB // ESTABLISHING LINK"><span>ENTER SOLAR LAB</span><span class="btn-arrow" aria-hidden="true">↗</span></a>
+          <h2 id="solar-title"><span class="solar-title-line">SOLAR</span><span class="solar-title-line solar-title-outline">LAB</span></h2>
+          <p class="solar-chinese-title">从一颗恒星，<br class="solar-mobile-break" />走向万千世界。</p>
+          <p class="solar-preview-description">沿着轨道，认识我们的宇宙邻居。<br />转动一颗行星，读懂一段遥远的故事。</p>
+          <div class="solar-entry-action"><a class="enter-btn" id="go-solar-lab" href="https://solar.empty610.com/terminal/" data-transition-label="SOLAR LAB // ESTABLISHING LINK"><span class="solar-button-copy"><span>进入太阳系实验室</span><small lang="en">ENTER SOLAR LAB</small></span><span class="btn-arrow" aria-hidden="true">↗</span></a></div>
         </div>
-        <div class="solar-preview-stage" aria-hidden="true"></div>
-        <div class="solar-preview-caption"><span>ONE STAR. MANY WORLDS.</span><span>SOLAR SYSTEM / EXPLORATION ATLAS</span></div>
+        <figure id="solar-motion-toggle" class="solar-preview-stage" role="button" tabindex="0" aria-pressed="false" aria-label="播放行星公转动画" aria-description="太阳与八颗行星的轨道艺术示意；距离、尺寸和公转速度均为展示比例。可点击或按空格暂停与继续。" title="点击星图暂停 / 继续">
+          <div class="solar-map-heading"><span><i></i> THE SOLAR NEIGHBOURHOOD</span><span>☉ / 01—08</span></div>
+          <svg class="solar-orrery" viewBox="0 0 900 690" aria-hidden="true" focusable="false">
+            <defs>
+              <radialGradient id="solar-aura"><stop stop-color="#d8a34d" stop-opacity=".14"/><stop offset="1" stop-color="#d8a34d" stop-opacity="0"/></radialGradient>
+              <radialGradient id="solar-star"><stop stop-color="#fffbe6"/><stop offset=".65" stop-color="#f5d393"/><stop offset="1" stop-color="#c7984d"/></radialGradient>
+            </defs>
+            <g fill="#e1d5bd"><circle cx="445" cy="270" r="0.55" opacity="0.21"/><circle cx="585" cy="257" r="1" opacity="0.21"/><circle cx="347" cy="429" r="0.55" opacity="0.39"/><circle cx="49" cy="52" r="0.55" opacity="0.21"/><circle cx="247" cy="520" r="0.55" opacity="0.39"/><circle cx="624" cy="368" r="1" opacity="0.12"/><circle cx="363" cy="93" r="1" opacity="0.39"/><circle cx="41" cy="389" r="0.55" opacity="0.21"/><circle cx="872" cy="42" r="0.55" opacity="0.12"/><circle cx="374" cy="150" r="0.55" opacity="0.3"/><circle cx="367" cy="64" r="0.55" opacity="0.39"/><circle cx="342" cy="511" r="1" opacity="0.3"/><circle cx="823" cy="383" r="0.55" opacity="0.39"/><circle cx="83" cy="614" r="0.55" opacity="0.39"/><circle cx="744" cy="91" r="1" opacity="0.12"/><circle cx="310" cy="202" r="0.55" opacity="0.3"/><circle cx="275" cy="114" r="0.55" opacity="0.39"/><circle cx="172" cy="630" r="0.55" opacity="0.12"/><circle cx="220" cy="193" r="0.55" opacity="0.12"/><circle cx="327" cy="86" r="1" opacity="0.39"/><circle cx="345" cy="607" r="1" opacity="0.21"/><circle cx="475" cy="187" r="0.55" opacity="0.39"/><circle cx="466" cy="162" r="0.55" opacity="0.3"/><circle cx="760" cy="427" r="0.55" opacity="0.12"/><circle cx="663" cy="218" r="1" opacity="0.39"/><circle cx="36" cy="293" r="1" opacity="0.12"/><circle cx="40" cy="531" r="0.55" opacity="0.12"/><circle cx="412" cy="333" r="0.55" opacity="0.12"/><circle cx="753" cy="451" r="1" opacity="0.21"/><circle cx="837" cy="138" r="1" opacity="0.21"/><circle cx="248" cy="341" r="0.55" opacity="0.12"/><circle cx="457" cy="612" r="0.55" opacity="0.21"/><circle cx="138" cy="323" r="1" opacity="0.3"/><circle cx="481" cy="195" r="0.55" opacity="0.21"/><circle cx="589" cy="162" r="0.55" opacity="0.21"/><circle cx="670" cy="122" r="0.55" opacity="0.3"/><circle cx="682" cy="481" r="0.55" opacity="0.3"/><circle cx="794" cy="269" r="0.55" opacity="0.3"/><circle cx="874" cy="120" r="0.55" opacity="0.3"/><circle cx="367" cy="217" r="0.55" opacity="0.39"/><circle cx="387" cy="258" r="1" opacity="0.39"/><circle cx="692" cy="67" r="0.55" opacity="0.12"/><circle cx="132" cy="572" r="1" opacity="0.12"/><circle cx="772" cy="136" r="0.55" opacity="0.12"/><circle cx="462" cy="436" r="1" opacity="0.3"/><circle cx="631" cy="588" r="0.55" opacity="0.39"/><circle cx="817" cy="359" r="0.55" opacity="0.21"/><circle cx="225" cy="358" r="1" opacity="0.21"/><circle cx="688" cy="349" r="0.55" opacity="0.12"/><circle cx="97" cy="179" r="0.55" opacity="0.21"/><circle cx="666" cy="275" r="1" opacity="0.3"/><circle cx="710" cy="354" r="0.55" opacity="0.3"/><circle cx="74" cy="464" r="0.55" opacity="0.3"/><circle cx="462" cy="90" r="1" opacity="0.3"/></g>
+            <circle cx="450" cy="350" r="290" fill="url(#solar-aura)"/>
+            <g class="solar-map-guides"><path d="M450 44V656M48 350H852"/><circle cx="450" cy="350" r="295"/><path d="M442 54h16m-16 592h16M54 342v16m792-16v16"/></g>
+            <g class="solar-orbits"><ellipse class="solar-orbit" pathLength="1" cx="450" cy="350" rx="62" ry="30.38" transform="rotate(-24 450 350)" style="--orbit-delay:0s"/>
+              <ellipse class="solar-orbit" pathLength="1" cx="450" cy="350" rx="91" ry="44.589999999999996" transform="rotate(-24 450 350)" style="--orbit-delay:0.055s"/>
+              <ellipse class="solar-orbit" pathLength="1" cx="450" cy="350" rx="126" ry="61.74" transform="rotate(-24 450 350)" style="--orbit-delay:0.11s"/>
+              <ellipse class="solar-orbit" pathLength="1" cx="450" cy="350" rx="162" ry="79.38" transform="rotate(-24 450 350)" style="--orbit-delay:0.165s"/>
+              <ellipse class="solar-orbit" pathLength="1" cx="450" cy="350" rx="222" ry="108.78" transform="rotate(-24 450 350)" style="--orbit-delay:0.22s"/>
+              <ellipse class="solar-orbit" pathLength="1" cx="450" cy="350" rx="282" ry="138.18" transform="rotate(-24 450 350)" style="--orbit-delay:0.275s"/>
+              <ellipse class="solar-orbit" pathLength="1" cx="450" cy="350" rx="343" ry="168.07" transform="rotate(-24 450 350)" style="--orbit-delay:0.33s"/>
+              <ellipse class="solar-orbit" pathLength="1" cx="450" cy="350" rx="410" ry="200.9" transform="rotate(-24 450 350)" style="--orbit-delay:0.385s"/></g>
+            <g class="solar-sun"><circle cx="450" cy="350" r="37" fill="#d4aa61" opacity=".06"/><circle cx="450" cy="350" r="28" fill="#e9c783" opacity=".09"/><circle cx="450" cy="350" r="20" fill="url(#solar-star)"/><circle cx="450" cy="350" r="23" fill="none" stroke="#d5b06c" stroke-opacity=".3"/><text x="450" y="399">THE SUN</text></g>
+            <g class="solar-planets"><g class="solar-planet" data-orbit="MERCURY" data-radius="62" data-angle="230" data-period="24" data-size="3.5" transform="translate(404.13 344.95)">
+                <defs><radialGradient id="solar-day-mercury" gradientUnits="userSpaceOnUse" cx="1.4328937309591216" cy="0" r="5.7749999999999995"><stop stop-color="#ddd0b4"/><stop offset=".48" stop-color="#918372"/><stop offset="1" stop-color="#3b362e"/></radialGradient><radialGradient id="solar-night-mercury" cx="50%" cy="50%" r="65%"><stop stop-color="#3b362e"/><stop offset="1" stop-color="#141712"/></radialGradient></defs>
+
+                <circle class="solar-night" r="3.5" fill="url(#solar-night-mercury)"/>
+                <g class="solar-illumination" transform="rotate(6.28)"><path class="solar-daylight" d="M 0 -3.5 A 3.5 3.5 0 0 1 0 3.5 A 2.337 3.5 0 0 1 0 -3.5 Z" fill="url(#solar-day-mercury)"/><path class="solar-lit-rim" d="M 0 -3.5 A 3.5 3.5 0 0 1 0 3.5" fill="none" stroke="#ddd0b4" stroke-width=".55" opacity=".45"/></g>
+
+
+              </g>
+              <g class="solar-planet" data-orbit="VENUS" data-radius="91" data-angle="90" data-period="34" data-size="5.5" transform="translate(468.14 390.73)">
+                <defs><radialGradient id="solar-day-venus" gradientUnits="userSpaceOnUse" cx="1.48225" cy="0" r="9.075"><stop stop-color="#f1d9a3"/><stop offset=".48" stop-color="#c7a978"/><stop offset="1" stop-color="#50402b"/></radialGradient><radialGradient id="solar-night-venus" cx="50%" cy="50%" r="65%"><stop stop-color="#50402b"/><stop offset="1" stop-color="#141712"/></radialGradient></defs>
+
+                <circle class="solar-night" r="5.5" fill="url(#solar-night-venus)"/>
+                <g class="solar-illumination" transform="rotate(-114.00)"><path class="solar-daylight" d="M 0 -5.5 A 5.5 5.5 0 0 1 0 5.5 A 4.794 5.5 0 0 0 0 -5.5 Z" fill="url(#solar-day-venus)"/><path class="solar-lit-rim" d="M 0 -5.5 A 5.5 5.5 0 0 1 0 5.5" fill="none" stroke="#f1d9a3" stroke-width=".55" opacity=".45"/></g>
+
+
+              </g>
+              <g class="solar-planet" data-orbit="EARTH" data-radius="126" data-angle="16" data-period="46" data-size="7" transform="translate(567.57 316.28)">
+                <defs><radialGradient id="solar-day-earth" gradientUnits="userSpaceOnUse" cx="3.7372096434854463" cy="0" r="11.549999999999999"><stop stop-color="#c8e4df"/><stop offset=".48" stop-color="#739fb0"/><stop offset="1" stop-color="#243d4a"/></radialGradient><radialGradient id="solar-night-earth" cx="50%" cy="50%" r="65%"><stop stop-color="#243d4a"/><stop offset="1" stop-color="#141712"/></radialGradient></defs>
+
+                <circle class="solar-night" r="7" fill="url(#solar-night-earth)"/>
+                <g class="solar-illumination" transform="rotate(164.00)"><path class="solar-daylight" d="M 0 -7 A 7 7 0 0 1 0 7 A 1.682 7 0 0 0 0 -7 Z" fill="url(#solar-day-earth)"/><path class="solar-lit-rim" d="M 0 -7 A 7 7 0 0 1 0 7" fill="none" stroke="#c8e4df" stroke-width=".55" opacity=".45"/></g>
+
+                <path d="M15 0h16l10-12h24" class="solar-leader"/><text x="17" y="-20" class="solar-planet-label">03 / EARTH</text>
+              </g>
+              <g class="solar-planet" data-orbit="MARS" data-radius="162" data-angle="175" data-period="60" data-size="4.5" transform="translate(305.38 421.96)">
+                <defs><radialGradient id="solar-day-mars" gradientUnits="userSpaceOnUse" cx="2.467846447832128" cy="0" r="7.425"><stop stop-color="#e5b194"/><stop offset=".48" stop-color="#b16c4b"/><stop offset="1" stop-color="#502d22"/></radialGradient><radialGradient id="solar-night-mars" cx="50%" cy="50%" r="65%"><stop stop-color="#502d22"/><stop offset="1" stop-color="#141712"/></radialGradient></defs>
+
+                <circle class="solar-night" r="4.5" fill="url(#solar-night-mars)"/>
+                <g class="solar-illumination" transform="rotate(-26.45)"><path class="solar-daylight" d="M 0 -4.5 A 4.5 4.5 0 0 1 0 4.5 A 0.342 4.5 0 0 0 0 -4.5 Z" fill="url(#solar-day-mars)"/><path class="solar-lit-rim" d="M 0 -4.5 A 4.5 4.5 0 0 1 0 4.5" fill="none" stroke="#e5b194" stroke-width=".55" opacity=".45"/></g>
+
+
+              </g>
+              <g class="solar-planet" data-orbit="JUPITER" data-radius="222" data-angle="315" data-period="84" data-size="17" transform="translate(562.12 215.88)">
+                <defs><radialGradient id="solar-day-jupiter" gradientUnits="userSpaceOnUse" cx="7.362494219013009" cy="0" r="28.049999999999997"><stop stop-color="#f0dcb0"/><stop offset=".48" stop-color="#c09c71"/><stop offset="1" stop-color="#50412d"/></radialGradient><radialGradient id="solar-night-jupiter" cx="50%" cy="50%" r="65%"><stop stop-color="#50412d"/><stop offset="1" stop-color="#141712"/></radialGradient></defs>
+
+                <circle class="solar-night" r="17" fill="url(#solar-night-jupiter)"/>
+                <g class="solar-illumination" transform="rotate(129.90)"><path class="solar-daylight" d="M 0 -17 A 17 17 0 0 1 0 17 A 10.479 17 0 0 1 0 -17 Z" fill="url(#solar-day-jupiter)"/><path class="solar-lit-rim" d="M 0 -17 A 17 17 0 0 1 0 17" fill="none" stroke="#f0dcb0" stroke-width=".55" opacity=".45"/></g>
+
+
+              </g>
+              <g class="solar-planet" data-orbit="SATURN" data-radius="282" data-angle="80" data-period="108" data-size="14" transform="translate(550.08 454.40)">
+                <defs><radialGradient id="solar-day-saturn" gradientUnits="userSpaceOnUse" cx="3.948934987302735" cy="0" r="23.099999999999998"><stop stop-color="#efdfb7"/><stop offset=".48" stop-color="#c7ae79"/><stop offset="1" stop-color="#514630"/></radialGradient><radialGradient id="solar-night-saturn" cx="50%" cy="50%" r="65%"><stop stop-color="#514630"/><stop offset="1" stop-color="#141712"/></radialGradient><linearGradient id="solar-ring-light" gradientUnits="userSpaceOnUse" x1="-28" y1="0" x2="28" y2="0"><stop stop-color="#ead8a3"/><stop offset=".48" stop-color="#a59169"/><stop offset="1" stop-color="#3b3529"/></linearGradient></defs>
+                <ellipse class="solar-ring-back" rx="27" ry="8" transform="rotate(-24)" fill="none" stroke="url(#solar-ring-light)" stroke-width="3.5"/>
+                <circle class="solar-night" r="14" fill="url(#solar-night-saturn)"/>
+                <g class="solar-illumination" transform="rotate(-133.79)"><path class="solar-daylight" d="M 0 -14 A 14 14 0 0 1 0 14 A 12.019 14 0 0 0 0 -14 Z" fill="url(#solar-day-saturn)"/><path class="solar-lit-rim" d="M 0 -14 A 14 14 0 0 1 0 14" fill="none" stroke="#efdfb7" stroke-width=".55" opacity=".45"/></g>
+                <path class="solar-ring-front" d="M -27 0 A 27 8 0 0 0 27 0" transform="rotate(-24)" fill="none" stroke="url(#solar-ring-light)" stroke-width="3.5"/>
+                <path d="M22 0h16l10-12h24" class="solar-leader"/><text x="24" y="-20" class="solar-planet-label">06 / SATURN</text>
+              </g>
+              <g class="solar-planet" data-orbit="URANUS" data-radius="343" data-angle="214" data-period="138" data-size="9" transform="translate(152.00 379.80)">
+                <defs><radialGradient id="solar-day-uranus" gradientUnits="userSpaceOnUse" cx="4.322066571220662" cy="0" r="14.85"><stop stop-color="#d7eee4"/><stop offset=".48" stop-color="#8ab8b7"/><stop offset="1" stop-color="#35555b"/></radialGradient><radialGradient id="solar-night-uranus" cx="50%" cy="50%" r="65%"><stop stop-color="#35555b"/><stop offset="1" stop-color="#141712"/></radialGradient></defs>
+
+                <circle class="solar-night" r="9" fill="url(#solar-night-uranus)"/>
+                <g class="solar-illumination" transform="rotate(-5.71)"><path class="solar-daylight" d="M 0 -9 A 9 9 0 0 1 0 9 A 4.387 9 0 0 1 0 -9 Z" fill="url(#solar-day-uranus)"/><path class="solar-lit-rim" d="M 0 -9 A 9 9 0 0 1 0 9" fill="none" stroke="#d7eee4" stroke-width=".55" opacity=".45"/></g>
+
+
+              </g>
+              <g class="solar-planet" data-orbit="NEPTUNE" data-radius="410" data-angle="145" data-period="168" data-size="9" transform="translate(190.05 591.87)">
+                <defs><radialGradient id="solar-day-neptune" gradientUnits="userSpaceOnUse" cx="4.286827330447313" cy="0" r="14.85"><stop stop-color="#b7d1eb"/><stop offset=".48" stop-color="#6c93c1"/><stop offset="1" stop-color="#293d66"/></radialGradient><radialGradient id="solar-night-neptune" cx="50%" cy="50%" r="65%"><stop stop-color="#293d66"/><stop offset="1" stop-color="#141712"/></radialGradient></defs>
+
+                <circle class="solar-night" r="9" fill="url(#solar-night-neptune)"/>
+                <g class="solar-illumination" transform="rotate(-42.94)"><path class="solar-daylight" d="M 0 -9 A 9 9 0 0 1 0 9 A 4.500 9 0 0 0 0 -9 Z" fill="url(#solar-day-neptune)"/><path class="solar-lit-rim" d="M 0 -9 A 9 9 0 0 1 0 9" fill="none" stroke="#b7d1eb" stroke-width=".55" opacity=".45"/></g>
+
+                <path d="M17 0h16l10-12h24" class="solar-leader"/><text x="19" y="-20" class="solar-planet-label">08 / NEPTUNE</text>
+              </g></g>
+            <text x="450" y="56" class="solar-map-scale">N / ECLIPTIC</text><text x="450" y="657" class="solar-map-scale">ONE STAR. MANY WORLDS.</text>
+          </svg>
+
+        </figure>
+        <div class="solar-preview-caption"><span class="solar-caption-sign">SOLAR SYSTEM / <b>太阳系实验室</b></span></div>
       </section>
 
       <!-- 未来 -->
@@ -181,6 +267,7 @@
   <script src="home/app.js?v=20261005-solar-lab" defer></script>
   <script src="shared/idle-controls.js?v=20260910" defer></script>
   <script src="home/navigation.js?v=20261005-solar-lab" defer></script>
+  <script src="home/solar-entry.js?v=20261014-solar-motion" defer></script>
 
 </body>
 </html>
