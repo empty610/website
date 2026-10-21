@@ -1,6 +1,0 @@
-.pioneer-panel{padding:32px 28px;background:linear-gradient(135deg,rgba(255,252,246,.76),rgba(237,228,214,.48))}
-.pioneer-intro{margin-bottom:23px}.pioneer-intro .rover-kicker{margin:0 0 8px}.pioneer-intro h3{margin:0;font-size:27px;font-weight:650;letter-spacing:.05em}.pioneer-intro p:not(.rover-kicker){margin:9px 0 0;color:var(--muted);font-size:12px}
-.pioneer-tabs{display:flex;gap:7px;border-bottom:1px solid var(--line-strong);padding-bottom:12px}.pioneer-tabs button{border:1px solid var(--line);background:rgba(255,255,255,.42);border-radius:8px;color:var(--muted);padding:8px 13px;font:11px inherit;cursor:pointer}.pioneer-tabs button[aria-selected="true"]{border-color:var(--gold);background:var(--gold-soft);color:#a55335}
-.pioneer-content{min-height:140px;margin-top:16px;padding:22px;border:1px solid var(--line);border-radius:12px;background:rgba(255,252,246,.65);font:14px var(--mono);color:var(--muted)}
-.pioneer-content-enter{animation:tab-view-enter .3s cubic-bezier(.2,.72,.2,1) both}
-@media(max-width:560px){.pioneer-panel{padding:18px 14px}.pioneer-tabs{flex-wrap:wrap}.pioneer-tabs button{flex:1 1 40%}.pioneer-content{min-height:110px;padding:17px}}

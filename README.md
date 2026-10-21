@@ -8,7 +8,6 @@
 | `delocalized configuration project/` | DC 启动面、仪表盘及地球贴图 |
 | `home/solar-entry.css` | Solar Lab 项目入口的文字与留白布局 |
 | `_redirects` | 将旧金星、火星页面网址转到 Solar Lab 对应档案 |
-| `venus/`、`mars/` | 原页面素材存档，主页已合并为 Solar Lab 入口 |
 | `shared/` | 多页面共用的音乐、字体、按钮行为和 Three.js 文件 |
 | `scripts/` | 主页样式合并与本地引用检查 |
 
@@ -22,4 +21,6 @@
 
 DC 启动前会确认三维脚本、地球模块和贴图已加载。失败时留在启动页并显示重试按钮；浏览器不支持 WebGL 时也会保留返回入口。系统选择“减少动态效果”时，主页内容取消移动入场，DC 默认暂停，可用速度按钮主动开启运转。航天器卡片支持 Tab 聚焦及 Enter / Space 激活。
 
-`shared/vendor/three/examples/jsm/controls/OrbitControls.global.js` 是运行时加载的版本。原来的 `OrbitControls.js` 源副本未被网页引用，已移除。火星探测器的路线图片由 ID 动态拼接文件名，必须保留。
+`shared/vendor/three/examples/jsm/controls/OrbitControls.global.js` 是运行时加载的版本。原来的 `OrbitControls.js` 源副本未被网页引用，已移除。
+
+旧 `venus/`、`mars/` 页面及其专属素材、两套旧主页预览脚本/样式和未引用的五张行星 PNG 已移除。当前太阳系插画由 SVG 绘制；主页、DC、音频、字体、Three.js 和地球贴图继续使用各自现有资源。`_redirects` 保留旧金星、火星页面网址到 Solar Lab 的跳转，历史主页片段 `#venus`、`#mars` 继续定位到项目入口。
