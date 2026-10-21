@@ -293,7 +293,9 @@ html.music-playing .music-toggle { color: #d9b95a; border-color: rgba(217, 185, 
 
 /* 首屏 WELCOME 随滚动离场时使用更舒缓的 3 秒淡出。 */
 .js .hero.reveal-fade {
-  transition: opacity 3s ease;
+  --welcome-fade-duration: 3s;
+  --scroll-cue-delay: calc(var(--welcome-fade-duration) + 1s);
+  transition: opacity var(--welcome-fade-duration) ease;
 }
 
 /* 三色装饰条 */
@@ -373,6 +375,8 @@ html:not(.js) .scroll-cue {
   opacity: 1;
   transform: translate(-50%, 0);
   pointer-events: auto;
+  /* Wait for WELCOME's outer fade to finish, then leave one more second. */
+  transition-delay: var(--scroll-cue-delay), var(--scroll-cue-delay), 0s;
 }
 
 .scroll-cue:hover,
@@ -396,11 +400,11 @@ html:not(.js) .scroll-cue {
 }
 
 .hero.enter .scroll-cue:not(.is-hidden) .scroll-cue-text {
-  animation: scroll-cue-pulse 2.1s ease-in-out infinite;
+  animation: scroll-cue-pulse 2.1s ease-in-out var(--scroll-cue-delay) infinite;
 }
 
 .hero.enter .scroll-cue:not(.is-hidden) .scroll-cue-arrow {
-  animation: scroll-cue-drop 2.1s ease-in-out infinite;
+  animation: scroll-cue-drop 2.1s ease-in-out var(--scroll-cue-delay) infinite;
 }
 
 @keyframes scroll-cue-pulse {

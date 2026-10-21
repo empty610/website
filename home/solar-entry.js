@@ -4,6 +4,11 @@
   const chart = document.getElementById('solar-orbital-art');
   if (!section || !chart) return;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const sun = [...chart.querySelectorAll('.solar-sun, .solar-sun-aura')];
+  const planetLayer = chart.querySelector('.solar-planets');
+  const orbits = [...chart.querySelectorAll('.solar-orbit')];
+  const PLANETS_AT = .5, ORBITS_AT = 1, ORBITS_DURATION = 3;
+  const RUN_AT = ORBITS_AT + ORBITS_DURATION;
   const planets = [...section.querySelectorAll('[data-orbit]')].map(node => ({
     node,
     radius: Number(node.dataset.radius),
@@ -19,7 +24,8 @@
     label: node.querySelector('.solar-planet-label'),
     leader: node.querySelector('.solar-leader')
   }));
-  let visible = false, frame = 0, previous = 0, lastPaint = 0;
+  let visible = false, frame = 0, previous = null, elapsed = 0;
+  let entered = section.classList.contains('enter');
   const tilt = -24 * Math.PI / 180, cos = Math.cos(tilt), sin = Math.sin(tilt);
   const flattening = .49, depth = Math.sqrt(1 - flattening * flattening);
   function render(delta) {
@@ -57,33 +63,53 @@
       }
     }
   }
+  const clamp = value => Math.max(0, Math.min(1, value));
+  function reveal() {
+    const time = reduced.matches ? RUN_AT : elapsed;
+    for (const node of sun) node.style.opacity = clamp(time / .3);
+    planetLayer.style.opacity = clamp((time - PLANETS_AT) / .3);
+    for (const orbit of orbits) orbit.style.strokeDashoffset = 1 - clamp((time - ORBITS_AT) / ORBITS_DURATION);
+  }
   function canRun() {
-    return !reduced.matches && visible && !document.hidden && !document.documentElement.classList.contains('dc-navigation-active');
+    return !reduced.matches && entered && visible && !document.hidden && !document.documentElement.classList.contains('dc-navigation-active');
   }
   function tick(now) {
     frame = 0;
     if (!canRun()) return;
-    if (!previous) previous = now;
-    if (now - lastPaint >= 16) {
-      render(Math.min((now - previous) / 1000, .1));
-      previous = now; lastPaint = now;
-    }
+    const delta = previous === null ? 0 : Math.min((now - previous) / 1000, .1);
+    previous = now;
+    const before = elapsed;
+    elapsed += delta;
+    reveal();
+    // Only time after the final path is complete contributes to orbital motion.
+    const motionDelta = Math.max(0, elapsed - RUN_AT) - Math.max(0, before - RUN_AT);
+    if (motionDelta > 0) render(motionDelta);
+    section.dataset.motion = elapsed >= RUN_AT ? 'running' : 'intro';
     frame = requestAnimationFrame(tick);
   }
   function update() {
-    cancelAnimationFrame(frame); frame = 0; previous = 0; lastPaint = 0;
-    section.dataset.motion = canRun() ? 'running' : 'paused';
+    cancelAnimationFrame(frame); frame = 0; previous = null;
+    const nextEntered = section.classList.contains('enter');
+    if (entered && !nextEntered) {
+      elapsed = 0;
+      for (const planet of planets) planet.angle = Number(planet.node.dataset.angle) * Math.PI / 180;
+      render(0);
+    }
+    entered = nextEntered;
+    reveal();
+    section.dataset.motion = canRun() ? (elapsed >= RUN_AT ? 'running' : 'intro') : 'paused';
     if (canRun()) frame = requestAnimationFrame(tick);
   }
+  new MutationObserver(update).observe(section, { attributes: true, attributeFilter: ['class'] });
   reduced.addEventListener('change', update);
   new IntersectionObserver(entries => {
     visible = entries[0].isIntersecting; update();
-  }, { threshold: 0 }).observe(section);
+  }, { threshold: 0 }).observe(chart);
   document.addEventListener('visibilitychange', update);
   window.addEventListener('site-navigation', update);
   window.addEventListener('pagehide', () => { visible = false; update(); });
   window.addEventListener('pageshow', () => {
-    const box = section.getBoundingClientRect(); visible = box.bottom > 0 && box.top < innerHeight; update();
+    const box = chart.getBoundingClientRect(); visible = box.bottom > 0 && box.top < innerHeight; update();
   });
   render(0);
   update();

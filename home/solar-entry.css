@@ -103,10 +103,13 @@
 .solar-preview.enter .solar-chinese-title { animation: solar-atlas-in 1s .18s both; }
 .solar-preview.enter .solar-preview-description { animation: solar-atlas-in 1s .25s both; }
 .solar-preview.enter .solar-entry-action { animation: solar-atlas-in 1s .32s both; }
-.solar-preview.enter .solar-preview-stage { animation: solar-atlas-in 1.5s .2s both; }
+.solar-preview.enter .solar-preview-stage { opacity: 1; }
+.solar-preview.enter .solar-map-heading { animation: solar-atlas-in 1s .2s both; }
 .solar-preview.enter .solar-preview-caption { animation: solar-atlas-in 1s .45s both; }
-.js .solar-orbit { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.8s cubic-bezier(.22, 1, .36, 1); transition-delay: var(--orbit-delay); }
-.solar-preview.enter .solar-orbit { stroke-dashoffset: 0; }
+/* One active-time clock in solar-entry.js reveals the bodies, draws all eight
+   paths together over 3s, then releases the planets into motion. */
+.js .solar-sun, .js .solar-sun-aura, .js .solar-planets { opacity: 0; }
+.js .solar-orbit { stroke-dasharray: 1; stroke-dashoffset: 1; }
 @keyframes solar-atlas-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 @media (min-width: 1600px) { .solar-preview-stage { width: min(100% + 4vw, 860px); margin-left: -2vw; } }
 @media (max-width: 1050px) and (min-width: 701px) {
@@ -150,6 +153,8 @@
 @media (prefers-reduced-motion: reduce) {
   .js .solar-preview .solar-preview-copy > *, .js .solar-preview-stage, .js .solar-preview-top, .js .solar-preview-caption { opacity: 1; animation: none; transform: none; }
   .js .solar-orbit { stroke-dashoffset: 0; transition: none; }
+  .js .solar-sun, .js .solar-sun-aura, .js .solar-planets { opacity: 1; }
+  .solar-preview.enter .solar-map-heading { animation: none; }
   .solar-preview .enter-btn, .solar-preview .enter-btn .btn-arrow, .solar-preview .enter-btn .btn-arrow svg { transition: none; }
   .solar-preview .enter-btn:hover .btn-arrow svg { transform: none; }
 }
