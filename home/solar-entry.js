@@ -7,7 +7,7 @@
   const sun = [...chart.querySelectorAll('.solar-sun, .solar-sun-aura')];
   const planetLayer = chart.querySelector('.solar-planets');
   const orbits = [...chart.querySelectorAll('.solar-orbit')];
-  const PLANETS_AT = .5, ORBITS_AT = 1, ORBITS_DURATION = 1.5;
+  const PLANETS_AT = .5, ORBITS_AT = PLANETS_AT, ORBITS_DURATION = 1.5;
   const RUN_AT = ORBITS_AT, INTRO_END = ORBITS_AT + ORBITS_DURATION;
   const planets = [...section.querySelectorAll('[data-orbit]')].map(node => ({
     node,
@@ -84,7 +84,7 @@
     const before = elapsed;
     elapsed += delta;
     if (before < INTRO_END) reveal();
-    // After the planets light up, motion and path drawing share one start time.
+    // Planet lighting, motion and path drawing share one start time.
     const motionDelta = Math.max(0, elapsed - RUN_AT) - Math.max(0, before - RUN_AT);
     if (motionDelta > 0) render(motionDelta);
     setMotion(elapsed >= RUN_AT ? 'running' : 'intro');

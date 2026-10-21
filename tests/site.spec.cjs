@@ -44,21 +44,21 @@ test('homepage navigation and metadata, with 3D assets deferred', async ({ page 
   expect(modelRequests).toEqual([]);
 });
 
-test('solar intro moves while drawing the orbits, without redundant intro writes', async ({ page }) => {
+test('solar intro lights and moves planets with orbit drawing, without redundant intro writes', async ({ page }) => {
   const clockStart = new Date('2026-10-21T00:00:00Z');
   await page.clock.install({ time: clockStart });
   await page.goto('/#projects');
   await expect(page.locator('#projects')).toHaveClass(/enter/);
   await page.clock.pauseAt(new Date(clockStart.getTime() + 60000));
-  // Restart the entry with a frozen clock so the two milestones can be checked
+  // Restart the entry with a frozen clock so the shared start can be checked
   // independently of loading speed and the machine's display refresh rate.
   await page.evaluate(() => document.getElementById('projects').classList.remove('enter'));
   await page.evaluate(() => document.getElementById('projects').classList.add('enter'));
   const orbit = page.locator('.solar-orbit').first();
   const planet = page.locator('.solar-planet').first();
   const initial = await planet.getAttribute('transform');
-  await page.clock.runFor(900);
-  await expect(page.locator('.solar-planets')).toHaveCSS('opacity', '1');
+  await page.clock.runFor(400);
+  await expect(page.locator('.solar-planets')).toHaveCSS('opacity', '0');
   expect(Number(await orbit.evaluate(node => node.style.strokeDashoffset))).toBe(1);
   expect(await planet.getAttribute('transform')).toBe(initial);
   await page.clock.runFor(200);
@@ -67,8 +67,13 @@ test('solar intro moves while drawing the orbits, without redundant intro writes
   const offset = Number(await orbit.evaluate(node => node.style.strokeDashoffset));
   expect(offset).toBeGreaterThan(.9);
   expect(offset).toBeLessThan(1);
+  const opacity = Number(await page.locator('.solar-planets').evaluate(node => node.style.opacity));
+  expect(opacity).toBeGreaterThan(0);
+  expect(opacity).toBeLessThan(1);
+  expect(opacity).toBeCloseTo((1 - offset) * (1.5 / .3), 3);
   await expect(page.locator('#projects')).toHaveAttribute('data-motion', 'running');
   await page.clock.runFor(1300);
+  await expect(page.locator('.solar-planets')).toHaveCSS('opacity', '1');
   const remaining = await page.locator('.solar-orbit').evaluateAll(nodes => nodes.map(node => Number(node.style.strokeDashoffset)));
   for (const offset of remaining) {
     expect(offset).toBeGreaterThan(.04);
