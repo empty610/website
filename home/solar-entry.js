@@ -7,8 +7,8 @@
   const sun = [...chart.querySelectorAll('.solar-sun, .solar-sun-aura')];
   const planetLayer = chart.querySelector('.solar-planets');
   const orbits = [...chart.querySelectorAll('.solar-orbit')];
-  const PLANETS_AT = .5, ORBITS_AT = 1, ORBITS_DURATION = 3;
-  const RUN_AT = ORBITS_AT + ORBITS_DURATION;
+  const PLANETS_AT = .5, ORBITS_AT = 1, ORBITS_DURATION = 1.5;
+  const RUN_AT = ORBITS_AT, INTRO_END = ORBITS_AT + ORBITS_DURATION;
   const planets = [...section.querySelectorAll('[data-orbit]')].map(node => ({
     node,
     radius: Number(node.dataset.radius),
@@ -65,7 +65,7 @@
   }
   const clamp = value => Math.max(0, Math.min(1, value));
   function reveal() {
-    const time = reduced.matches ? RUN_AT : elapsed;
+    const time = reduced.matches ? INTRO_END : elapsed;
     for (const node of sun) node.style.opacity = clamp(time / .3);
     planetLayer.style.opacity = clamp((time - PLANETS_AT) / .3);
     for (const orbit of orbits) orbit.style.strokeDashoffset = 1 - clamp((time - ORBITS_AT) / ORBITS_DURATION);
@@ -83,8 +83,8 @@
     previous = now;
     const before = elapsed;
     elapsed += delta;
-    if (before < RUN_AT) reveal();
-    // Only time after the final path is complete contributes to orbital motion.
+    if (before < INTRO_END) reveal();
+    // After the planets light up, motion and path drawing share one start time.
     const motionDelta = Math.max(0, elapsed - RUN_AT) - Math.max(0, before - RUN_AT);
     if (motionDelta > 0) render(motionDelta);
     setMotion(elapsed >= RUN_AT ? 'running' : 'intro');

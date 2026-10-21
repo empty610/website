@@ -985,8 +985,8 @@ html:not(.js) .scroll-cue {
 .solar-preview.enter .solar-preview-stage { opacity: 1; }
 .solar-preview.enter .solar-map-heading { animation: solar-atlas-in 1s .2s both; }
 .solar-preview.enter .solar-preview-caption { animation: solar-atlas-in 1s .45s both; }
-/* One active-time clock in solar-entry.js reveals the bodies, draws all eight
-   paths together over 3s, then releases the planets into motion. */
+/* One active-time clock in solar-entry.js reveals the bodies, then starts
+   orbital motion and the eight paths' 1.5s drawing together. */
 .js .solar-sun, .js .solar-sun-aura, .js .solar-planets { opacity: 0; }
 .js .solar-orbit { stroke-dasharray: 1; stroke-dashoffset: 1; }
 @keyframes solar-atlas-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }

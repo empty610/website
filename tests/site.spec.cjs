@@ -21,7 +21,8 @@ async function startTerminal(page) {
   await page.getByRole('button', { name: 'INITIATE SYSTEM', exact: true }).click();
 }
 async function expectReady(page) {
-  await expect(page.locator('body')).toHaveAttribute('data-boot-state', 'ready');
+  // Asset preparation allows 15s, followed by the existing 2.6s transition.
+  await expect(page.locator('body')).toHaveAttribute('data-boot-state', 'ready', { timeout: 20000 });
   await expect(page.locator('#sceneWrapper')).toHaveClass(/is-model-ready/);
   await expect(page.locator('#three-canvas canvas')).toBeVisible();
   await expect(page.locator('#boot')).toBeHidden();
@@ -43,29 +44,50 @@ test('homepage navigation and metadata, with 3D assets deferred', async ({ page 
   expect(modelRequests).toEqual([]);
 });
 
-test('solar intro finishes drawing before moving, without redundant intro writes', async ({ page }) => {
+test('solar intro moves while drawing the orbits, without redundant intro writes', async ({ page }) => {
+  const clockStart = new Date('2026-10-21T00:00:00Z');
+  await page.clock.install({ time: clockStart });
   await page.goto('/#projects');
+  await expect(page.locator('#projects')).toHaveClass(/enter/);
+  await page.clock.pauseAt(new Date(clockStart.getTime() + 60000));
+  // Restart the entry with a frozen clock so the two milestones can be checked
+  // independently of loading speed and the machine's display refresh rate.
+  await page.evaluate(() => document.getElementById('projects').classList.remove('enter'));
+  await page.evaluate(() => document.getElementById('projects').classList.add('enter'));
   const orbit = page.locator('.solar-orbit').first();
-  await expect.poll(async () => Number(await orbit.evaluate(node => node.style.strokeDashoffset))).toBeLessThan(.8);
   const planet = page.locator('.solar-planet').first();
-  const stationary = await planet.getAttribute('transform');
-  await page.waitForTimeout(150);
-  expect(await planet.getAttribute('transform')).toBe(stationary);
+  const initial = await planet.getAttribute('transform');
+  await page.clock.runFor(900);
+  await expect(page.locator('.solar-planets')).toHaveCSS('opacity', '1');
+  expect(Number(await orbit.evaluate(node => node.style.strokeDashoffset))).toBe(1);
+  expect(await planet.getAttribute('transform')).toBe(initial);
+  await page.clock.runFor(200);
+  const moving = await planet.getAttribute('transform');
+  expect(moving).not.toBe(initial);
+  const offset = Number(await orbit.evaluate(node => node.style.strokeDashoffset));
+  expect(offset).toBeGreaterThan(.9);
+  expect(offset).toBeLessThan(1);
   await expect(page.locator('#projects')).toHaveAttribute('data-motion', 'running');
+  await page.clock.runFor(1300);
+  const remaining = await page.locator('.solar-orbit').evaluateAll(nodes => nodes.map(node => Number(node.style.strokeDashoffset)));
+  for (const offset of remaining) {
+    expect(offset).toBeGreaterThan(.04);
+    expect(offset).toBeLessThan(.1);
+    expect(offset).toBe(remaining[0]);
+  }
+  await page.clock.runFor(200);
   await expect(orbit).toHaveCSS('stroke-dashoffset', '0px');
-  await expect.poll(() => planet.getAttribute('transform')).not.toBe(stationary);
-  const repeatedWrites = await page.evaluate(async () => {
-    let count = 0;
-    const observer = new MutationObserver(records => { count += records.length; });
+  expect(await planet.getAttribute('transform')).not.toBe(moving);
+  await page.evaluate(() => {
+    window.solarIntroWrites = 0;
+    const observer = new MutationObserver(records => { window.solarIntroWrites += records.length; });
     for (const node of document.querySelectorAll('.solar-sun, .solar-sun-aura, .solar-planets, .solar-orbit')) {
       observer.observe(node, { attributes: true, attributeFilter: ['style'] });
     }
     observer.observe(document.querySelector('#projects'), { attributes: true, attributeFilter: ['data-motion'] });
-    await new Promise(resolve => setTimeout(resolve, 200));
-    observer.disconnect();
-    return count;
   });
-  expect(repeatedWrites).toBe(0);
+  await page.clock.runFor(200);
+  expect(await page.evaluate(() => window.solarIntroWrites)).toBe(0);
 });
 
 test('DC opens from the project link and cards work with Enter and Space', async ({ page }) => {
@@ -95,6 +117,8 @@ test('reduced motion keeps mobile content visible and DC stationary until reques
   await expect(page.locator('.hero-title')).toHaveCSS('animation-name', 'none');
   await expect(page.locator('#dc .deloc')).toHaveCSS('opacity', '1');
   await expect(page.locator('#dc .enter-btn')).toHaveCSS('opacity', '1');
+  await expect(page.locator('.solar-planets')).toHaveCSS('opacity', '1');
+  expect(await page.locator('.solar-orbit').evaluateAll(nodes => nodes.every(node => Number(node.style.strokeDashoffset) === 0))).toBe(true);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await startTerminal(page);
   await expectReady(page);
