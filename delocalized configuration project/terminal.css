@@ -466,9 +466,25 @@
             min-height: 100px;
         }
         .widget-card.selectable {
+            font: inherit;
+            color: inherit;
+            text-align: left;
+            width: 100%;
             cursor: pointer;
             border: 1.5px solid transparent;
             transition: box-shadow .25s ease, border-color .25s ease, background .25s ease;
+        }
+        .widget-card > span:not(.view-hint), .widget-card .sc-title { display: block; }
+        .widget-card.selectable:focus-visible, .orbit-tab:focus-visible,
+        .speed-btn:focus-visible, .b-btn:focus-visible {
+            outline: 2px solid #8c6c26;
+            outline-offset: 3px;
+        }
+        body[data-boot-state="error"] .b-status {
+            max-width: min(560px, 86vw);
+            color: #e2bc82;
+            letter-spacing: .08em;
+            line-height: 1.8;
         }
         /* 悬停：不上跳，只让边缘直接亮起 */
         .widget-card.selectable:hover:not(.selected) {
@@ -766,6 +782,13 @@ body[data-page="terminal"] #terminal {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body[data-page="terminal"] #terminal { animation-duration: 0.01ms; }
+  body[data-page="terminal"] #terminal,
+  #terminal *, #terminal *::before, #terminal *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto;
+  }
+  .boot-fade-group.fade-out, #floating-emblem.emblem-rise,
+  #main-ui, #main-ui.visible { transform: none; }
 }
 .terminal-close { text-decoration: none; }

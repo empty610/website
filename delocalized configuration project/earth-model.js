@@ -14,10 +14,14 @@ export function addEarthLighting(THREE, scene) {
   scene.add(rim);
 }
 
-export function createDCEarth(THREE, textureUrl, onReady, onError) {
+export function createDCEarth(THREE, textureUrl, onReady, onError, image) {
   const earthGroup = new THREE.Group();
   const radius = 1.25;
-  const tex = new THREE.TextureLoader().load(textureUrl, onReady, undefined, onError);
+  const tex = image ? new THREE.Texture(image) : new THREE.TextureLoader().load(textureUrl, onReady, undefined, onError);
+  if (image) {
+    tex.needsUpdate = true;
+    onReady?.();
+  }
   const earth = new THREE.Mesh(
     new THREE.SphereGeometry(radius, 64, 64),
     new THREE.MeshStandardMaterial({ map: tex, roughness: 0.45, metalness: 0.08 })

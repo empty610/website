@@ -6,22 +6,44 @@
         let THREE;
         let OrbitControls;
         let threeLoadPromise;
+        const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+        const EARTH_MODULE = './earth-model.js?v=20261021-site-quality';
+        let earthModule, earthImage, bootAttempt = 0;
+        let cleanupScene = () => {};
+        const transitionTimers = new Set();
+        function later(callback, delay) {
+            const timer = setTimeout(() => { transitionTimers.delete(timer); callback(); }, delay);
+            transitionTimers.add(timer);
+        }
+        function withTimeout(promise, message) {
+            let timer;
+            return Promise.race([promise, new Promise((_, reject) => {
+                timer = setTimeout(() => reject(new Error(message)), 15000);
+            })]).finally(() => clearTimeout(timer));
+        }
         function loadScript(src) {
             return new Promise((resolve, reject) => {
                 const script = document.createElement('script');
+                const finish = (error) => {
+                    clearTimeout(timer);
+                    script.onload = script.onerror = null;
+                    if (error) { script.remove(); reject(new Error('三维模块加载失败，请检查网络后重试。')); }
+                    else resolve();
+                };
+                const timer = setTimeout(() => finish(true), 15000);
                 script.src = src;
                 script.async = true;
-                script.onload = resolve;
-                script.onerror = () => reject(new Error(`Unable to load ${src}`));
+                script.onload = () => finish(false);
+                script.onerror = () => finish(true);
                 document.head.appendChild(script);
             });
         }
 
         function loadThree() {
             if (!threeLoadPromise) {
-                threeLoadPromise = loadScript('../shared/vendor/three/build/three.min.js')
-                    .then(() => loadScript('../shared/vendor/three/examples/jsm/controls/OrbitControls.global.js'))
-                    .then(() => location.protocol === 'file:'
+                threeLoadPromise = (globalThis.THREE ? Promise.resolve() : loadScript('../shared/vendor/three/build/three.min.js'))
+                    .then(() => globalThis.OrbitControls ? undefined : loadScript('../shared/vendor/three/examples/jsm/controls/OrbitControls.global.js'))
+                    .then(() => location.protocol === 'file:' && !globalThis.EARTH_TEXTURE_DATA_URL
                         ? loadScript('assets/textures/earth_atmos_2048.data.js')
                         : undefined)
                     .then(() => {
@@ -30,7 +52,7 @@
                     if (!THREE || !OrbitControls) {
                         throw new Error('Local Three.js runtime did not initialize');
                     }
-                });
+                }).catch(error => { threeLoadPromise = null; throw error; });
             }
             return threeLoadPromise;
         }
@@ -58,9 +80,17 @@
         let onUnlockVehicle = null; // 由 3D 场景注册：解除视角锁定
 
         function switchOrbitPanel(target, lockCamera = false) {
-            orbitTabBtns.forEach(t => t.classList.toggle('active', t.dataset.target === target));
+            orbitTabBtns.forEach(t => {
+                const selected = t.dataset.target === target;
+                t.classList.toggle('active', selected);
+                t.setAttribute('aria-pressed', String(selected));
+            });
             orbitPanels.querySelectorAll('.orbit-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === target));
-            vehicleCards.forEach(c => c.classList.toggle('selected', c.dataset.sc === target));
+            vehicleCards.forEach(c => {
+                const selected = c.dataset.sc === target;
+                c.classList.toggle('selected', selected);
+                c.setAttribute('aria-pressed', String(selected));
+            });
             orbitTitle.textContent = target === 'global' ? 'Orbital Parameters' : `Orbital Parameters · ${target}`;
             // Parameter tabs should only change the data.  Keeping their camera independent
             // leaves the Earth centered and fully visible in the main scene.
@@ -81,13 +111,22 @@
 
         /* ===== 运转速度控制（1x / 0.5x / 0.25x / 0.1x） ===== */
         const speedBtns = Array.from(document.querySelectorAll('.speed-btn'));
-        let orbitSpeed = 1;
+        let orbitSpeed = reducedMotion.matches ? 0 : 1;
         let onOrbitSpeedChange = null; // 由 3D 场景注册：速度档位变化时刷新角速度/周期显示
-        speedBtns.forEach(btn => btn.addEventListener('click', () => {
-            orbitSpeed = parseFloat(btn.dataset.speed);
-            speedBtns.forEach(b => b.classList.toggle('active', b === btn));
+        function setOrbitSpeed(value) {
+            orbitSpeed = value;
+            speedBtns.forEach(button => {
+                const selected = Number(button.dataset.speed) === value;
+                button.classList.toggle('active', selected);
+                button.setAttribute('aria-pressed', String(selected));
+            });
             if (onOrbitSpeedChange) onOrbitSpeedChange();
+        }
+        speedBtns.forEach(btn => btn.addEventListener('click', () => {
+            setOrbitSpeed(Number(btn.dataset.speed));
         }));
+        setOrbitSpeed(orbitSpeed);
+        reducedMotion.addEventListener('change', () => setOrbitSpeed(reducedMotion.matches ? 0 : 1));
 
         /* ========================================================
            修改 SUBTITLE_INTER 的值来调节字幕的(毫秒)
@@ -104,28 +143,82 @@
             'A NEW AGE IS UPON US!.'
         ];
 
-        function boot() {
-            initBtn.disabled = true;
-            // Start downloading the 3D renderer only after the user has opted into it.
-            // The transition below gives this request time to finish before the dashboard appears.
-            loadThree().catch(() => {
-                statusEl.textContent = '3D MODULE UNAVAILABLE';
+        function showBootError(error) {
+            transitionTimers.forEach(clearTimeout);
+            transitionTimers.clear();
+            cleanupScene();
+            cleanupScene = () => {};
+            onLockVehicle = onUnlockVehicle = onOrbitSpeedChange = null;
+            labelContainer.replaceChildren();
+            orbitPanels.querySelectorAll('[data-panel]:not([data-panel="global"])').forEach(panel => panel.remove());
+            switchOrbitPanel('global');
+            document.getElementById('bootEmblemSlot').appendChild(bEmblem);
+            bEmblem.classList.remove('periph-gone');
+            floatingEmblem.className = '';
+            floatingEmblem.removeAttribute('style');
+            bootScreen.style.display = '';
+            bootFadeGroup.classList.remove('fade-out');
+            bScanlines.classList.remove('fade-out');
+            bgTransition.classList.remove('to-light');
+            bgTransition.style.display = '';
+            mainUI.classList.remove('active', 'visible');
+            wrapper.classList.remove('is-model-ready');
+            document.body.dataset.bootState = 'error';
+            statusEl.textContent = error.message || '三维场景启动失败，请重试或返回主页。';
+            initBtn.querySelector('span').textContent = 'RETRY / 重试';
+            initBtn.disabled = false;
+        }
+        async function prepareScene() {
+            await loadThree();
+            const image = new Image();
+            const loaded = new Promise((resolve, reject) => {
+                image.onload = resolve;
+                image.onerror = () => reject(new Error('地球贴图加载失败，请检查网络后重试。'));
+                image.src = location.protocol === 'file:' ? globalThis.EARTH_TEXTURE_DATA_URL : 'assets/textures/earth_atmos_2048.jpg';
             });
+            try {
+                const [module] = await Promise.all([
+                    withTimeout(import(`${EARTH_MODULE}&attempt=${bootAttempt}`), '地球模块加载超时，请重试。')
+                        .catch(() => { throw new Error('地球模块加载失败，请重试。'); }),
+                    withTimeout(loaded, '地球贴图加载超时，请重试。')
+                ]);
+                earthModule = module;
+                earthImage = image;
+            } finally {
+                image.onload = image.onerror = null;
+            }
+        }
+        async function boot() {
+            if (initBtn.disabled) return;
+            initBtn.disabled = true;
+            bootAttempt += 1;
+            document.body.dataset.bootState = 'loading';
+            statusEl.textContent = 'LOADING 3D SCENE…';
             window.SiteMusic.startTerminal();
-
             let i = 0;
-            const iv = setInterval(() => {
-                statusEl.textContent = MSGS[i++];
-                if (i >= MSGS.length) {
+            let iv;
+            const subtitles = reducedMotion.matches ? Promise.resolve() : new Promise(resolve => {
+                iv = setInterval(() => {
+                    statusEl.textContent = MSGS[i++];
+                    if (i < MSGS.length) return;
                     clearInterval(iv);
-                    setTimeout(() => {
-                        startTransition();
-                    }, 400);
-                }
-            }, SUBTITLE_INTERVAL); // 使用变量控制速度
+                    statusEl.textContent = 'WAITING FOR 3D SCENE…';
+                    resolve();
+                }, SUBTITLE_INTERVAL);
+            });
+            try {
+                await Promise.all([prepareScene(), subtitles]);
+                statusEl.textContent = MSGS[MSGS.length - 1];
+                later(startTransition, reducedMotion.matches ? 0 : 400);
+            } catch (error) {
+                clearInterval(iv);
+                showBootError(error);
+            }
         }
 
         function startTransition() {
+            const reduced = reducedMotion.matches;
+            document.body.dataset.bootState = 'transition';
             // 将徽标移到固定过渡层：文字先淡出，核心图案则保留到最后上升。
             const emblemRect = bEmblem.getBoundingClientRect();
             floatingEmblem.style.left = `${emblemRect.left}px`;
@@ -146,37 +239,42 @@
             bEmblem.classList.add('periph-gone');
 
             // 外围轨道消失后，保留的核心航天器图案单独上升。
-            setTimeout(() => {
+            later(() => {
                 floatingEmblem.classList.add('emblem-rise');
-            }, 1500);
+            }, reduced ? 0 : 1500);
 
             // 上升完成后淡出徽标，再让主 UI 进入。
-            setTimeout(() => {
+            later(() => {
                 floatingEmblem.classList.add('emblem-gone');
                 mainUI.classList.add('active');
-                mainUI.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+                mainUI.style.transition = reduced ? 'none' : 'opacity 0.8s ease, transform 0.8s ease';
+                try {
+                    startApp();
+                } catch {
+                    showBootError(new Error('三维场景启动失败，请确认浏览器支持 WebGL 后重试或返回主页。'));
+                    return;
+                }
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
                         mainUI.classList.add('visible');
                     });
                 });
-                startApp();
-            }, 2600);
+                document.body.dataset.bootState = 'ready';
+            }, reduced ? 0 : 2600);
 
             // 清理
-            setTimeout(() => {
+            later(() => {
                 bootScreen.style.display = 'none';
                 floatingEmblem.style.display = 'none';
                 bgTransition.style.display = 'none';
-            }, 3500);
+            }, reduced ? 0 : 3500);
         }
 
         initBtn.addEventListener('click', boot);
 
         // ---------- 3D 场景（保持不变） ----------
-        async function startApp() {
-            await loadThree();
-            const { createDCEarth, addEarthLighting, EARTH_SPIN } = await import('./earth-model.js?v=20261007');
+        function startApp() {
+            const { createDCEarth, addEarthLighting, EARTH_SPIN } = earthModule;
             wrapper.classList.remove('is-model-ready');
             const scene = new THREE.Scene();
             scene.background = new THREE.Color('#ece6dc');
@@ -190,16 +288,33 @@
             camera.lookAt(0, 0, 0);
 
             const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+            let controls, stopped = false, frame = 0;
+            const cleanups = [];
+            cleanupScene = () => {
+                stopped = true;
+                cancelAnimationFrame(frame);
+                cleanups.forEach(cleanup => cleanup());
+                controls?.dispose();
+                scene.traverse(object => {
+                    object.geometry?.dispose();
+                    for (const material of [object.material].flat().filter(Boolean)) {
+                        material.map?.dispose();
+                        material.dispose();
+                    }
+                });
+                renderer.dispose();
+                renderer.domElement.remove();
+            };
             renderer.setSize(container.clientWidth, container.clientHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             renderer.toneMapping = THREE.ACESFilmicToneMapping;
             renderer.toneMappingExposure = 1.1;
             container.appendChild(renderer.domElement);
 
-            const controls = new OrbitControls(camera, renderer.domElement);
+            controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
-            controls.autoRotate = true;
+            controls.autoRotate = orbitSpeed > 0;
             controls.autoRotateSpeed = 1.6;
             controls.minDistance = 0.5;
             controls.maxDistance = 35;
@@ -215,7 +330,8 @@
                 THREE,
                 textureUrl,
                 () => { earthTextureReady = true; },
-                () => { earthTextureReady = false; }
+                () => { earthTextureReady = false; },
+                earthImage
             );
             scene.add(earthGroup);
             // 地球自转（受 Rotation Speed 档位控制；单位：1x 时每秒自转弧度）
@@ -342,8 +458,9 @@
                     const w = sc.omega * orbitSpeed;
                     sc.omegaDegEl.textContent = (w * 180 / Math.PI).toFixed(1);
                     sc.omegaRadEl.textContent = w.toFixed(2);
-                    sc.periodEl.textContent = (2 * Math.PI / w).toFixed(2);
+                    sc.periodEl.textContent = w > 0 ? (2 * Math.PI / w).toFixed(2) : '—';
                 });
+                controls.autoRotate = !lockObj && orbitSpeed > 0;
             };
 
             scene.add(new THREE.Points(
@@ -409,7 +526,7 @@
                 lockObj = null;
                 controls.enabled = true;
                 controls.enableDamping = true;
-                controls.autoRotate = true;
+                controls.autoRotate = orbitSpeed > 0;
                 // Every free/orbital view is anchored to the Earth, never the
                 // last selected spacecraft. This keeps the planet centered.
                 controls.target.set(0, 0, 0);
@@ -557,7 +674,8 @@
             const followPos = new THREE.Vector3();
             let lastFrameTime = performance.now();
             function animate(now) {
-                requestAnimationFrame(animate);
+                if (stopped) return;
+                frame = requestAnimationFrame(animate);
                 // 按真实时间差驱动运动，帧率（60/120/144Hz）不再影响速度
                 const delta = Math.min(Math.max((now - lastFrameTime) / 1000, 0), 0.1);
                 lastFrameTime = now;
@@ -588,6 +706,7 @@
                     wrapper.classList.add('is-model-ready');
                 }
             }
+            onOrbitSpeedChange();
             animate(performance.now());
 
             function onResize() {
@@ -597,7 +716,9 @@
                 renderer.setSize(w, h);
             }
             window.addEventListener('resize', onResize);
-            new ResizeObserver(onResize).observe(wrapper);
+            const resizeObserver = new ResizeObserver(onResize);
+            resizeObserver.observe(wrapper);
+            cleanups.push(() => { window.removeEventListener('resize', onResize); resizeObserver.disconnect(); });
 
             function updateClock() {
                 const now = new Date();
@@ -607,12 +728,13 @@
                 dom.clock.textContent = `${h}:${m}:${s}`;
             }
             updateClock();
-            setInterval(updateClock, 1000);
+            const clockTimer = setInterval(updateClock, 1000);
 
-            setInterval(() => {
+            const telemetryTimer = setInterval(() => {
                 dom.altitude.textContent = (400 + (Math.sin(Date.now()/5000)*0.00025 + 2.5)).toFixed(1);
                 dom.velocity.textContent  = (7.66 + Math.sin(Date.now()/3000)*0.0002).toFixed(3);
             }, 200);
+            cleanups.push(() => { clearInterval(clockTimer); clearInterval(telemetryTimer); });
         }
 
 

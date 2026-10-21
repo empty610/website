@@ -253,7 +253,7 @@ if (projectLinks.length && dcPageTransition) {
         dcPageTransition.classList.add('is-active');
         window.setTimeout(() => {
           window.location.assign(projectLink.href);
-        }, 1000);
+        }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1000);
       });
     });
   }));

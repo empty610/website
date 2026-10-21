@@ -73,6 +73,9 @@
   function canRun() {
     return !reduced.matches && entered && visible && !document.hidden && !document.documentElement.classList.contains('dc-navigation-active');
   }
+  function setMotion(value) {
+    if (section.dataset.motion !== value) section.dataset.motion = value;
+  }
   function tick(now) {
     frame = 0;
     if (!canRun()) return;
@@ -80,11 +83,11 @@
     previous = now;
     const before = elapsed;
     elapsed += delta;
-    reveal();
+    if (before < RUN_AT) reveal();
     // Only time after the final path is complete contributes to orbital motion.
     const motionDelta = Math.max(0, elapsed - RUN_AT) - Math.max(0, before - RUN_AT);
     if (motionDelta > 0) render(motionDelta);
-    section.dataset.motion = elapsed >= RUN_AT ? 'running' : 'intro';
+    setMotion(elapsed >= RUN_AT ? 'running' : 'intro');
     frame = requestAnimationFrame(tick);
   }
   function update() {
@@ -97,7 +100,7 @@
     }
     entered = nextEntered;
     reveal();
-    section.dataset.motion = canRun() ? (elapsed >= RUN_AT ? 'running' : 'intro') : 'paused';
+    setMotion(canRun() ? (elapsed >= RUN_AT ? 'running' : 'intro') : 'paused');
     if (canRun()) frame = requestAnimationFrame(tick);
   }
   new MutationObserver(update).observe(section, { attributes: true, attributeFilter: ['class'] });

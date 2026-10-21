@@ -18,4 +18,8 @@
 
 提交前运行 `node scripts/check-local-links.cjs` 检查 HTML/CSS 的本地引用。请通过本地 HTTP 服务预览整个目录；直接打开 `file://` 时，浏览器可能限制 ES modules 和三维预览。线上部署须发布整个目录，保留现有路径以及根目录的 `_headers` 文件。
 
+开发验证使用 Node.js 24：先运行 `npm ci` 和 `npx playwright install chromium`，再运行 `npm run build:css`、`npm run check`、`npm test`。检查涵盖 CSS 产物一致性、自有脚本语法、HTML/CSS/JS 引用、动态资源，以及主页导航、太阳系入场、DC 启动与失败重试、键盘和减少动态效果。浏览器测试遇到未预期的资源失败或未处理异常会失败；`.github/workflows/site-checks.yml` 在推送与 PR 时运行这些检查。`npm run preview` 提供只监听本机的预览服务；部署不需要安装测试依赖。
+
+DC 启动前会确认三维脚本、地球模块和贴图已加载。失败时留在启动页并显示重试按钮；浏览器不支持 WebGL 时也会保留返回入口。系统选择“减少动态效果”时，主页内容取消移动入场，DC 默认暂停，可用速度按钮主动开启运转。航天器卡片支持 Tab 聚焦及 Enter / Space 激活。
+
 `shared/vendor/three/examples/jsm/controls/OrbitControls.global.js` 是运行时加载的版本。原来的 `OrbitControls.js` 源副本未被网页引用，已移除。火星探测器的路线图片由 ID 动态拼接文件名，必须保留。

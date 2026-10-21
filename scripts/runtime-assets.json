@@ -1,0 +1,10 @@
+[
+  {
+    "from": "delocalized configuration project/terminal.js",
+    "references": [
+      "./earth-model.js",
+      "assets/textures/earth_atmos_2048.jpg",
+      "assets/textures/earth_atmos_2048.data.js"
+    ]
+  }
+]

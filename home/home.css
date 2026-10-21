@@ -834,6 +834,20 @@ html:not(.js) .scroll-cue {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .loading, .main, .js .hero.reveal-fade, .future,
+  .js .hero .hero-title, .js .hero .accent-bar,
+  .js .about .section-head, .js .about .about-grid,
+  .js .future .future-title, .js .future .future-sub, .js .future .future-body,
+  .section-3 .deloc, .section-3 .deloc-sub, .section-3 .enter-btn {
+    animation: none !important;
+    transition: none !important;
+    transform: none;
+  }
+  .js .hero .hero-title, .js .hero .accent-bar,
+  .js .about .section-head, .js .about .about-grid,
+  .js .future .future-title, .js .future .future-sub, .js .future .future-body,
+  .section-3 .deloc, .section-3 .deloc-sub, .section-3 .enter-btn { opacity: 1; }
+  .hero.enter .scroll-cue:not(.is-hidden) { transition-delay: 0s; }
   .dc-page-transition,
   .dc-page-transition.is-active,
   .dc-transition-core { transition-duration: 0.01ms; }

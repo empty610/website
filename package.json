@@ -1,0 +1,13 @@
+{
+  "name": "empty610-personal-site",
+  "private": true,
+  "scripts": {
+    "build:css": "node scripts/build-home-css.cjs",
+    "check": "node scripts/build-home-css.cjs --check && node scripts/check-local-links.cjs && node scripts/check-syntax.cjs",
+    "test": "playwright test",
+    "preview": "node scripts/preview.cjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  }
+}
