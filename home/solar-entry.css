@@ -93,7 +93,8 @@
 .solar-orbit:nth-child(2n) { stroke: #c5b48d6b; }
 .solar-sun text { fill: #b8a786; font: 8px Consolas, monospace; text-anchor: middle; letter-spacing: 2px; }
 .solar-leader { fill: none; stroke: #b4a58866; stroke-width: .7; }
-.solar-planet-label { fill: #c5b69a; font: 8px Consolas, monospace; letter-spacing: 1px; }
+.solar-planet-label { fill: #c5b69a; font: 8px Consolas, monospace; letter-spacing: 1px; paint-order: stroke fill; stroke: #11120f; stroke-width: 3px; stroke-linejoin: round; }
+.solar-annotations, .solar-annotation-leaders { pointer-events: none; }
 .solar-map-scale { fill: #7e796c; text-anchor: middle; font: 8px Consolas, monospace; letter-spacing: 2px; }
 .solar-preview-caption { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; gap: 24px; min-height: 38px; padding-top: 18px; border-top: 1px solid var(--solar-hairline); color: #999180; font: 8px/1.8 Consolas, monospace; letter-spacing: .1em; }
 .solar-caption-sign b { font: 10px var(--font); letter-spacing: .08em; }
@@ -110,6 +111,8 @@
    and the eight paths' 1.5s drawing together. */
 .js .solar-sun, .js .solar-sun-aura, .js .solar-planets { opacity: 0; }
 .js .solar-orbit { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.js .solar-annotations, .js .solar-annotation-leaders,
+.js .solar-planets .solar-planet-label, .js .solar-planets .solar-leader { opacity: 0; }
 @keyframes solar-atlas-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 @media (min-width: 1600px) { .solar-preview-stage { width: min(100% + 4vw, 860px); margin-left: -2vw; } }
 @media (max-width: 1050px) and (min-width: 701px) {
@@ -154,6 +157,8 @@
   .js .solar-preview .solar-preview-copy > *, .js .solar-preview-stage, .js .solar-preview-top, .js .solar-preview-caption { opacity: 1; animation: none; transform: none; }
   .js .solar-orbit { stroke-dashoffset: 0; transition: none; }
   .js .solar-sun, .js .solar-sun-aura, .js .solar-planets { opacity: 1; }
+  .js .solar-annotations, .js .solar-annotation-leaders,
+  .js .solar-planets .solar-planet-label, .js .solar-planets .solar-leader { opacity: 1; }
   .solar-preview.enter .solar-map-heading { animation: none; }
   .solar-preview .enter-btn, .solar-preview .enter-btn .btn-arrow, .solar-preview .enter-btn .btn-arrow svg { transition: none; }
   .solar-preview .enter-btn:hover .btn-arrow svg { transform: none; }

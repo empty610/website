@@ -83,16 +83,122 @@ test('solar intro lights and moves planets with orbit drawing, without redundant
   await page.clock.runFor(200);
   await expect(orbit).toHaveCSS('stroke-dashoffset', '0px');
   expect(await planet.getAttribute('transform')).not.toBe(moving);
+  await page.clock.runFor(800);
   await page.evaluate(() => {
     window.solarIntroWrites = 0;
     const observer = new MutationObserver(records => { window.solarIntroWrites += records.length; });
-    for (const node of document.querySelectorAll('.solar-sun, .solar-sun-aura, .solar-planets, .solar-orbit')) {
+    for (const node of document.querySelectorAll('.solar-sun, .solar-sun-aura, .solar-planets, .solar-orbit, .solar-annotations, .solar-annotation-leaders')) {
       observer.observe(node, { attributes: true, attributeFilter: ['style'] });
     }
     observer.observe(document.querySelector('#projects'), { attributes: true, attributeFilter: ['data-motion'] });
   });
   await page.clock.runFor(200);
   expect(await page.evaluate(() => window.solarIntroWrites)).toBe(0);
+});
+
+test('solar annotations wait for paths, pulse once, pause and reset with the artwork', async ({ page }) => {
+  const start = new Date('2026-10-21T00:00:00Z');
+  await page.clock.install({ time: start });
+  await page.goto('/#projects');
+  await expect(page.locator('#projects')).toHaveClass(/enter/);
+  await page.clock.pauseAt(new Date(start.getTime() + 60000));
+  await page.evaluate(() => document.getElementById('projects').classList.remove('enter'));
+  await page.evaluate(() => document.getElementById('projects').classList.add('enter'));
+  const labels = page.locator('.solar-annotations');
+  await expect(labels.locator('.solar-planet-label')).toHaveCount(3);
+  await expect(page.locator('.solar-planets .solar-planet-label')).toHaveCount(0);
+  expect(await page.evaluate(() => {
+    const svg = document.querySelector('.solar-orrery');
+    const children = [...svg.children];
+    return children.indexOf(svg.querySelector('.solar-annotation-leaders')) < children.indexOf(svg.querySelector('.solar-planets'))
+      && children.indexOf(svg.querySelector('.solar-annotations')) > children.indexOf(svg.querySelector('.solar-planets'));
+  })).toBe(true);
+  await expect(labels).toHaveCSS('pointer-events', 'none');
+  await page.clock.runFor(1900);
+  await expect(labels).toHaveCSS('opacity', '0');
+  expect(Number(await page.locator('.solar-orbit').first().evaluate(node => node.style.strokeDashoffset))).toBeGreaterThan(0);
+  await page.clock.runFor(280);
+  await expect(page.locator('.solar-orbit').first()).toHaveCSS('stroke-dashoffset', '0px');
+  const partial = await labels.getAttribute('style');
+  const position = await labels.locator('.solar-annotation').first().getAttribute('transform');
+  expect(Number(await labels.evaluate(node => node.style.opacity))).toBeGreaterThan(0);
+  expect(Number(await labels.evaluate(node => node.style.opacity))).toBeLessThan(1);
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'hidden', { configurable: true, value: true });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await page.clock.runFor(3000);
+  expect(await labels.getAttribute('style')).toBe(partial);
+  expect(await labels.locator('.solar-annotation').first().getAttribute('transform')).toBe(position);
+  await page.evaluate(() => { delete document.hidden; document.dispatchEvent(new Event('visibilitychange')); });
+  const opacity = [];
+  for (let i = 0; i < 45; i++) {
+    await page.clock.runFor(16);
+    opacity.push(Number(await labels.evaluate(node => node.style.opacity)));
+  }
+  expect(opacity.some((value, i) => i > 0 && value < opacity[i - 1] - .01)).toBe(true);
+  await expect(labels).toHaveCSS('opacity', '1');
+  await expect(page.locator('.solar-annotation-leaders')).toHaveCSS('opacity', '1');
+  await page.evaluate(() => document.getElementById('projects').classList.remove('enter'));
+  await expect(labels).toHaveCSS('opacity', '0');
+  await page.evaluate(() => document.getElementById('projects').classList.add('enter'));
+  await page.clock.runFor(1900);
+  await expect(labels).toHaveCSS('opacity', '0');
+  await page.clock.runFor(1000);
+  await expect(labels).toHaveCSS('opacity', '1');
+  await expect(page.locator('.solar-annotations')).toHaveCount(1);
+});
+
+test('solar annotation layers stay clear of planets, text and chart edges', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  for (const [name, width, height] of [['desktop', 1366, 900], ['mobile', 390, 844], ['landscape', 844, 390]]) {
+    await page.setViewportSize({ width, height });
+    await page.goto('/#projects');
+    await expect(page.locator('.solar-annotations')).toHaveCSS('opacity', '1');
+    await page.locator('#solar-orbital-art').scrollIntoViewIfNeeded();
+    await page.locator('#solar-orbital-art').screenshot({ path: `test-results/solar-labels-${name}.png` });
+    for (const phase of [0, 45, 90, 135, 180, 225, 270, 315]) {
+      await page.evaluate(phase => {
+        for (const node of document.querySelectorAll('.solar-planet')) {
+          node.dataset.originalAngle ||= node.dataset.angle;
+          node.dataset.angle = Number(node.dataset.originalAngle) + phase;
+        }
+        document.getElementById('projects').classList.remove('enter');
+      }, phase);
+      await page.evaluate(() => document.getElementById('projects').classList.add('enter'));
+      const conflicts = await page.evaluate(() => {
+        const svg = document.querySelector('.solar-orrery');
+        const canvas = svg.getBoundingClientRect();
+        const scale = Math.hypot(svg.getScreenCTM().a, svg.getScreenCTM().b);
+        const texts = [...svg.querySelectorAll('.solar-planet-label')];
+        const leaders = [...svg.querySelectorAll('.solar-annotation-leaders .solar-leader')];
+        const boxes = texts.map(node => node.getBoundingClientRect());
+        const bodies = [...svg.querySelectorAll('.solar-planet')].map(node => ({
+          point: new DOMPoint().matrixTransform(node.getScreenCTM()),
+          radius: (node.querySelector('#solar-ring-light') ? 30 : Number(node.dataset.size)) * scale,
+        }));
+        const issues = [];
+        boxes.forEach((box, i) => {
+          const end = Number(leaders[i].getAttribute('d').match(/H ([-\d.]+)$/)[1]);
+          const span = Math.abs(end) - Math.abs(Number(texts[i].getAttribute('x')));
+          if (Math.abs(span - texts[i].getBBox().width) > .5) issues.push('unmeasured text ' + i);
+          if (box.left < canvas.left || box.right > canvas.right || box.top < canvas.top || box.bottom > canvas.bottom) issues.push('edge ' + i);
+          for (const body of bodies) {
+            const dx = body.point.x - Math.max(box.left, Math.min(box.right, body.point.x));
+            const dy = body.point.y - Math.max(box.top, Math.min(box.bottom, body.point.y));
+            if (Math.hypot(dx, dy) < body.radius) issues.push('planet ' + i);
+          }
+          for (let j = i + 1; j < boxes.length; j++) {
+            const other = boxes[j];
+            if (box.left < other.right && box.right > other.left && box.top < other.bottom && box.bottom > other.top) issues.push('label ' + i + '/' + j);
+          }
+        });
+        return issues;
+      });
+      expect(conflicts, `${name}, phase ${phase}`).toEqual([]);
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
+  }
 });
 
 test('DC opens from the project link and cards work with Enter and Space', async ({ page }) => {
@@ -123,6 +229,8 @@ test('reduced motion keeps mobile content visible and DC stationary until reques
   await expect(page.locator('#dc .deloc')).toHaveCSS('opacity', '1');
   await expect(page.locator('#dc .enter-btn')).toHaveCSS('opacity', '1');
   await expect(page.locator('.solar-planets')).toHaveCSS('opacity', '1');
+  await expect(page.locator('.solar-annotations')).toHaveCSS('opacity', '1');
+  await expect(page.locator('.solar-annotation-leaders')).toHaveCSS('opacity', '1');
   expect(await page.locator('.solar-orbit').evaluateAll(nodes => nodes.every(node => Number(node.style.strokeDashoffset) === 0))).toBe(true);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await startTerminal(page);
