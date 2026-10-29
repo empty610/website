@@ -6,7 +6,6 @@
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const sun = [...chart.querySelectorAll('.solar-sun, .solar-sun-aura')];
   const planetLayer = chart.querySelector('.solar-planets');
-  const orbits = [...chart.querySelectorAll('.solar-orbit')];
   const PLANETS_AT = .5, ORBITS_AT = PLANETS_AT, ORBITS_DURATION = 1.5;
   const RUN_AT = ORBITS_AT, INTRO_END = ORBITS_AT + ORBITS_DURATION;
   const LABEL_DURATION = .72, LABEL_END = INTRO_END + LABEL_DURATION;
@@ -51,6 +50,23 @@
   let entered = section.classList.contains('enter');
   const tilt = -24 * Math.PI / 180, cos = Math.cos(tilt), sin = Math.sin(tilt);
   const flattening = .49, depth = Math.sqrt(1 - flattening * flattening);
+  // Start each closed orbit at its planet's entry position. Two half-ellipse
+  // arcs preserve the atlas geometry and draw in the direction of revolution.
+  const orbits = planets.map(planet => {
+    const ellipse = chart.querySelector('.solar-orbit[rx="' + planet.radius + '"]');
+    const path = document.createElementNS(svg.namespaceURI, 'path');
+    const rx = planet.radius, ry = rx * flattening;
+    const x = rx * Math.cos(planet.angle), y = ry * Math.sin(planet.angle);
+    const start = (450 + x) + ' ' + (350 + y);
+    const opposite = (450 - x) + ' ' + (350 - y);
+    for (const name of ['class', 'pathLength', 'transform']) {
+      path.setAttribute(name, ellipse.getAttribute(name));
+    }
+    path.setAttribute('d', 'M ' + start + ' A ' + rx + ' ' + ry + ' 0 0 1 ' + opposite
+      + ' A ' + rx + ' ' + ry + ' 0 0 1 ' + start + ' Z');
+    ellipse.replaceWith(path);
+    return path;
+  });
   function render(delta) {
     for (const planet of planets) {
       planet.angle = (planet.angle + delta * planet.speed) % (Math.PI * 2);
