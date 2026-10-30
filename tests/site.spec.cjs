@@ -70,7 +70,7 @@ test('solar intro draws equal distances at one speed and finishes shorter orbits
   const opacity = Number(await page.locator('.solar-planets').evaluate(node => node.style.opacity));
   expect(opacity).toBeGreaterThan(0);
   expect(opacity).toBeLessThan(1);
-  expect(opacity).toBeCloseTo((1 - offset) * (1.5 / .3), 3);
+  expect(opacity).toBeCloseTo((1 - offset) * (3 / .3), 3);
   await expect(page.locator('#projects')).toHaveAttribute('data-motion', 'running');
   const drawnDistances = () => page.locator('.solar-orbit').evaluateAll(nodes =>
     nodes.map(node => (1 - Number(node.style.strokeDashoffset)) * node.getTotalLength()));
@@ -81,13 +81,13 @@ test('solar intro draws equal distances at one speed and finishes shorter orbits
   const nextDistances = await drawnDistances();
   for (const distance of nextDistances) expect(distance).toBeCloseTo(nextDistances[0], 2);
   expect(nextDistances[0]).toBeGreaterThan(firstDistances[0]);
-  await page.clock.runFor(1220);
+  await page.clock.runFor(2620);
   await expect(page.locator('.solar-planets')).toHaveCSS('opacity', '1');
   const remaining = await page.locator('.solar-orbit').evaluateAll(nodes => nodes.map(node => Number(node.style.strokeDashoffset)));
   for (const offset of remaining.slice(0, -1)) expect(offset).toBe(0);
   expect(remaining.at(-1)).toBeGreaterThan(.04);
   expect(remaining.at(-1)).toBeLessThan(.1);
-  await page.clock.runFor(200);
+  await page.clock.runFor(300);
   await expect(orbit).toHaveCSS('stroke-dashoffset', '0px');
   expect(await planet.getAttribute('transform')).not.toBe(moving);
   await page.clock.runFor(800);
@@ -121,7 +121,7 @@ test('solar annotations wait for paths, pulse once, pause and reset with the art
       && children.indexOf(svg.querySelector('.solar-annotations')) > children.indexOf(svg.querySelector('.solar-planets'));
   })).toBe(true);
   await expect(labels).toHaveCSS('pointer-events', 'none');
-  await page.clock.runFor(1900);
+  await page.clock.runFor(3400);
   await expect(labels).toHaveCSS('opacity', '0');
   expect(Number(await page.locator('.solar-orbit').last().evaluate(node => node.style.strokeDashoffset))).toBeGreaterThan(0);
   await page.clock.runFor(280);
@@ -149,7 +149,7 @@ test('solar annotations wait for paths, pulse once, pause and reset with the art
   await page.evaluate(() => document.getElementById('projects').classList.remove('enter'));
   await expect(labels).toHaveCSS('opacity', '0');
   await page.evaluate(() => document.getElementById('projects').classList.add('enter'));
-  await page.clock.runFor(1900);
+  await page.clock.runFor(3400);
   await expect(labels).toHaveCSS('opacity', '0');
   await page.clock.runFor(1000);
   await expect(labels).toHaveCSS('opacity', '1');

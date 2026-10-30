@@ -6,7 +6,7 @@
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const sun = [...chart.querySelectorAll('.solar-sun, .solar-sun-aura')];
   const planetLayer = chart.querySelector('.solar-planets');
-  const PLANETS_AT = .5, ORBITS_AT = PLANETS_AT, OUTER_ORBIT_DURATION = 1.5;
+  const PLANETS_AT = .5, ORBITS_AT = PLANETS_AT, OUTER_ORBIT_DURATION = 3;
   const RUN_AT = ORBITS_AT, INTRO_END = ORBITS_AT + OUTER_ORBIT_DURATION;
   const LABEL_DURATION = .72, LABEL_END = INTRO_END + LABEL_DURATION;
   const planets = [...section.querySelectorAll('[data-orbit]')].map(node => ({
