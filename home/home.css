@@ -987,7 +987,7 @@ html:not(.js) .scroll-cue {
 .solar-preview.enter .solar-map-heading { animation: solar-atlas-in 1s .2s both; }
 .solar-preview.enter .solar-preview-caption { animation: solar-atlas-in 1s .45s both; }
 /* One active-time clock in solar-entry.js starts body lighting, orbital motion
-   and the eight paths' 1.5s drawing together. */
+   and constant-speed path drawing together; the longest path takes 1.5s. */
 .js .solar-sun, .js .solar-sun-aura, .js .solar-planets { opacity: 0; }
 .js .solar-orbit { stroke-dasharray: 1; stroke-dashoffset: 1; }
 .js .solar-annotations, .js .solar-annotation-leaders,
