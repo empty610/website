@@ -8,6 +8,7 @@
   const planetLayer = chart.querySelector('.solar-planets');
   const orbits = [...chart.querySelectorAll('.solar-orbit')];
   const PLANETS_AT = .5, ORBITS_AT = PLANETS_AT, ORBITS_DURATION = 1.5;
+  const ORBITS_PRE_DRAWN = .2;
   const RUN_AT = ORBITS_AT, INTRO_END = ORBITS_AT + ORBITS_DURATION;
   const LABEL_DURATION = .72, LABEL_END = INTRO_END + LABEL_DURATION;
   const planets = [...section.querySelectorAll('[data-orbit]')].map(node => ({
@@ -135,7 +136,7 @@
     const time = reduced.matches ? INTRO_END : elapsed;
     for (const node of sun) node.style.opacity = clamp(time / .3);
     planetLayer.style.opacity = clamp((time - PLANETS_AT) / .3);
-    for (const orbit of orbits) orbit.style.strokeDashoffset = 1 - clamp((time - ORBITS_AT) / ORBITS_DURATION);
+    for (const orbit of orbits) orbit.style.strokeDashoffset = (1 - ORBITS_PRE_DRAWN) * (1 - clamp((time - ORBITS_AT) / ORBITS_DURATION));
   }
   function revealLabels() {
     const time = reduced.matches ? LABEL_DURATION : elapsed - INTRO_END;

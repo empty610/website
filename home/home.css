@@ -989,7 +989,8 @@ html:not(.js) .scroll-cue {
 /* One active-time clock in solar-entry.js starts body lighting, orbital motion
    and the eight paths' 1.5s drawing together. */
 .js .solar-sun, .js .solar-sun-aura, .js .solar-planets { opacity: 0; }
-.js .solar-orbit { stroke-dasharray: 1; stroke-dashoffset: 1; }
+/* Show the first fifth immediately, then continue drawing on entry. */
+.js .solar-orbit { stroke-dasharray: 1; stroke-dashoffset: .8; }
 .js .solar-annotations, .js .solar-annotation-leaders,
 .js .solar-planets .solar-planet-label, .js .solar-planets .solar-leader { opacity: 0; }
 @keyframes solar-atlas-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
