@@ -9,7 +9,8 @@
   const orbits = [...chart.querySelectorAll('.solar-orbit')];
   // Let the atlas assemble: sunlight, inner-to-outer paths, then annotations.
   const ORBITS_AT = .08, ORBITS_DURATION = 2.4, ORBIT_STAGGER = .055;
-  const PLANETS_AT = .55, PLANETS_DURATION = .75, RUN_AT = PLANETS_AT;
+  const PLANETS_AT = .55, PLANETS_DURATION = .6, PLANET_STAGGER = .06;
+  const RUN_AT = PLANETS_AT, RUN_RAMP = .8, ORBITS_PRE_DRAWN = .14;
   const INTRO_END = ORBITS_AT + ORBITS_DURATION + (orbits.length - 1) * ORBIT_STAGGER;
   const LABELS_AT = INTRO_END + .12, LABEL_DURATION = .65, LABEL_END = LABELS_AT + LABEL_DURATION;
   const planets = [...section.querySelectorAll('[data-orbit]')].map(node => ({
@@ -134,14 +135,27 @@
   }
   const clamp = value => Math.max(0, Math.min(1, value));
   const smooth = value => { const t = clamp(value); return t * t * (3 - 2 * t); };
+  // Avoid reapplying settled intro styles while longer tracks are still drawing.
+  function setStyle(node, name, value) {
+    const next = String(value);
+    if (node.style[name] !== next) node.style[name] = next;
+  }
+  // Integrate the velocity ramp so pause/resume and frame rate stay consistent.
+  function motionTime(time) {
+    const t = Math.max(0, time - RUN_AT);
+    return t < RUN_RAMP ? t * t / (2 * RUN_RAMP) : t - RUN_RAMP / 2;
+  }
   function reveal() {
     const time = reduced.matches ? INTRO_END : elapsed;
-    for (const node of sun) node.style.opacity = smooth(time / .65);
-    planetLayer.style.opacity = smooth((time - PLANETS_AT) / PLANETS_DURATION);
+    for (const node of sun) setStyle(node, 'opacity', smooth(time / .65));
+    setStyle(planetLayer, 'opacity', 1);
+    for (const [index, planet] of planets.entries()) {
+      setStyle(planet.node, 'opacity', smooth((time - PLANETS_AT - index * PLANET_STAGGER) / PLANETS_DURATION));
+    }
     for (const [index, orbit] of orbits.entries()) {
       const progress = smooth((time - ORBITS_AT - index * ORBIT_STAGGER) / ORBITS_DURATION);
-      orbit.style.strokeDashoffset = 1 - progress;
-      orbit.style.opacity = .35 + .65 * progress;
+      setStyle(orbit, 'strokeDashoffset', (1 - ORBITS_PRE_DRAWN) * (1 - progress));
+      setStyle(orbit, 'opacity', .2 + .8 * smooth(time / .6));
     }
   }
   function revealLabels() {
@@ -167,7 +181,7 @@
     if (before < INTRO_END) reveal();
     if (before < LABEL_END) revealLabels();
     // The planets begin moving as they fade into the partially drawn atlas.
-    const motionDelta = Math.max(0, elapsed - RUN_AT) - Math.max(0, before - RUN_AT);
+    const motionDelta = motionTime(elapsed) - motionTime(before);
     if (motionDelta > 0) render(motionDelta);
     setMotion(elapsed >= RUN_AT ? 'running' : 'intro');
     frame = requestAnimationFrame(tick);

@@ -44,7 +44,7 @@ test('homepage navigation and metadata, with 3D assets deferred', async ({ page 
   expect(modelRequests).toEqual([]);
 });
 
-test('solar atlas draws before planets, staggers paths and settles without redundant writes', async ({ page }) => {
+test('solar atlas pre-draws paths, reveals planets in order and settles without redundant writes', async ({ page }) => {
   const clockStart = new Date('2026-10-21T00:00:00Z');
   await page.clock.install({ time: clockStart });
   await page.goto('/#projects');
@@ -58,24 +58,26 @@ test('solar atlas draws before planets, staggers paths and settles without redun
   const planet = page.locator('.solar-planet').first();
   const initial = await planet.getAttribute('transform');
   await page.clock.runFor(400);
-  await expect(page.locator('.solar-planets')).toHaveCSS('opacity', '0');
+  expect(await page.locator('.solar-planet').evaluateAll(nodes => nodes.every(node => Number(node.style.opacity) === 0))).toBe(true);
   const early = await page.locator('.solar-orbit').evaluateAll(nodes => nodes.map(node => Number(node.style.strokeDashoffset)));
-  expect(early[0]).toBeLessThan(1);
-  expect(early[0]).toBeGreaterThan(.9);
-  expect(early.at(-1)).toBe(1);
+  expect(early[0]).toBeLessThan(.86);
+  expect(early[0]).toBeGreaterThan(.75);
+  expect(early.at(-1)).toBe(.86);
   expect(await planet.getAttribute('transform')).toBe(initial);
-  await page.clock.runFor(200);
+  // Allow the velocity ramp to advance beyond the SVG position rounding.
+  await page.clock.runFor(300);
   const moving = await planet.getAttribute('transform');
   expect(moving).not.toBe(initial);
   const offset = Number(await orbit.evaluate(node => node.style.strokeDashoffset));
-  expect(offset).toBeGreaterThan(.8);
+  expect(offset).toBeGreaterThan(.7);
   expect(offset).toBeLessThan(early[0]);
-  const opacity = Number(await page.locator('.solar-planets').evaluate(node => node.style.opacity));
+  const opacity = Number(await planet.evaluate(node => node.style.opacity));
   expect(opacity).toBeGreaterThan(0);
   expect(opacity).toBeLessThan(1);
+  await expect(page.locator('.solar-planet').last()).toHaveCSS('opacity', '0');
   await expect(page.locator('#projects')).toHaveAttribute('data-motion', 'running');
-  await page.clock.runFor(2000);
-  await expect(page.locator('.solar-planets')).toHaveCSS('opacity', '1');
+  await page.clock.runFor(1900);
+  expect(await page.locator('.solar-planet').evaluateAll(nodes => nodes.every(node => Number(node.style.opacity) === 1))).toBe(true);
   const remaining = await page.locator('.solar-orbit').evaluateAll(nodes => nodes.map(node => Number(node.style.strokeDashoffset)));
   expect(remaining[0]).toBe(0);
   expect(remaining.at(-1)).toBeGreaterThan(0);
@@ -87,7 +89,7 @@ test('solar atlas draws before planets, staggers paths and settles without redun
   await page.evaluate(() => {
     window.solarIntroWrites = 0;
     const observer = new MutationObserver(records => { window.solarIntroWrites += records.length; });
-    for (const node of document.querySelectorAll('.solar-sun, .solar-sun-aura, .solar-planets, .solar-orbit, .solar-annotations, .solar-annotation-leaders')) {
+    for (const node of document.querySelectorAll('.solar-sun, .solar-sun-aura, .solar-planets, .solar-planet, .solar-orbit, .solar-annotations, .solar-annotation-leaders')) {
       observer.observe(node, { attributes: true, attributeFilter: ['style'] });
     }
     observer.observe(document.querySelector('#projects'), { attributes: true, attributeFilter: ['data-motion'] });
