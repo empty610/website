@@ -13,7 +13,7 @@
 
 主页样式请修改 `home/style.css`、`home/solar-entry.css` 或 `home/navigation.css`，再运行 `node scripts/build-home-css.cjs`（也可用 Bun 运行）。`home/home.css` 是页面实际加载的合并产物，不建议直接编辑。
 
-“项目”导航定位到 `#projects`；旧的 `#venus`、`#mars` 主页片段仍会定位到合并后的入口。Solar Lab 入口沿用 Venus 的暖黑金色模板，右侧留白，底部说明保留独立布局空间，宽屏或横屏下不会挤出入口按钮。点击入口时播放金色双轨道连接动画，约 1 秒后直接进入 `/terminal/`。主页不加载地球模型；DC 页面继续使用 `delocalized configuration project/earth-model.js` 渲染地球。
+“项目”导航定位到 `#projects`；旧的 `#venus`、`#mars` 主页片段仍会定位到合并后的入口。Solar Lab 入口采用航天任务控制台风格：深海军蓝、骨白和信号红，搭配硬边按钮、任务编号与轨道仪表框。入场依次展开太阳、轨道、行星和标签，底部说明保留独立布局空间。点击入口时播放金色双轨道连接动画，约 1 秒后直接进入 `/terminal/`。主页不加载地球模型；DC 页面继续使用 `delocalized configuration project/earth-model.js` 渲染地球。
 
 提交前运行 `node scripts/check-local-links.cjs` 检查 HTML/CSS 的本地引用。请通过本地 HTTP 服务预览整个目录；直接打开 `file://` 时，浏览器可能限制 ES modules 和三维预览。线上部署须发布整个目录，保留现有路径以及根目录的 `_headers` 文件。
 
