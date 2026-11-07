@@ -7,10 +7,11 @@
   const sun = [...chart.querySelectorAll('.solar-sun, .solar-sun-aura')];
   const planetLayer = chart.querySelector('.solar-planets');
   const orbits = [...chart.querySelectorAll('.solar-orbit')];
-  const PLANETS_AT = .5, ORBITS_AT = PLANETS_AT, ORBITS_DURATION = 1.5;
-  const ORBITS_PRE_DRAWN = .2;
-  const RUN_AT = ORBITS_AT, INTRO_END = ORBITS_AT + ORBITS_DURATION;
-  const LABEL_DURATION = .72, LABEL_END = INTRO_END + LABEL_DURATION;
+  // Let the atlas assemble: sunlight, inner-to-outer paths, then annotations.
+  const ORBITS_AT = .08, ORBITS_DURATION = 2.4, ORBIT_STAGGER = .055;
+  const PLANETS_AT = .55, PLANETS_DURATION = .75, RUN_AT = PLANETS_AT;
+  const INTRO_END = ORBITS_AT + ORBITS_DURATION + (orbits.length - 1) * ORBIT_STAGGER;
+  const LABELS_AT = INTRO_END + .12, LABEL_DURATION = .65, LABEL_END = LABELS_AT + LABEL_DURATION;
   const planets = [...section.querySelectorAll('[data-orbit]')].map(node => ({
     node,
     radius: Number(node.dataset.radius),
@@ -132,25 +133,20 @@
     }
   }
   const clamp = value => Math.max(0, Math.min(1, value));
+  const smooth = value => { const t = clamp(value); return t * t * (3 - 2 * t); };
   function reveal() {
     const time = reduced.matches ? INTRO_END : elapsed;
-    for (const node of sun) node.style.opacity = clamp(time / .3);
-    planetLayer.style.opacity = clamp((time - PLANETS_AT) / .3);
-    for (const orbit of orbits) orbit.style.strokeDashoffset = (1 - ORBITS_PRE_DRAWN) * (1 - clamp((time - ORBITS_AT) / ORBITS_DURATION));
+    for (const node of sun) node.style.opacity = smooth(time / .65);
+    planetLayer.style.opacity = smooth((time - PLANETS_AT) / PLANETS_DURATION);
+    for (const [index, orbit] of orbits.entries()) {
+      const progress = smooth((time - ORBITS_AT - index * ORBIT_STAGGER) / ORBITS_DURATION);
+      orbit.style.strokeDashoffset = 1 - progress;
+      orbit.style.opacity = .35 + .65 * progress;
+    }
   }
   function revealLabels() {
-    const time = reduced.matches ? LABEL_DURATION : elapsed - INTRO_END;
-    // Two subdued reception pulses, then settle. This uses active time so
-    // leaving the viewport or tab pauses the reveal together with the planets.
-    const stops = [[0, 0], [.08, .65], [.15, .25], [.3, .85], [.39, .55], [LABEL_DURATION, 1]];
-    let opacity = time <= 0 ? 0 : 1;
-    for (let i = 1; time > 0 && i < stops.length; i++) {
-      if (time > stops[i][0]) continue;
-      const [start, from] = stops[i - 1], [end, to] = stops[i];
-      opacity = from + (to - from) * (time - start) / (end - start);
-      break;
-    }
-    const value = opacity.toFixed(3);
+    const time = reduced.matches ? LABEL_DURATION : elapsed - LABELS_AT;
+    const value = smooth(time / LABEL_DURATION).toFixed(3);
     if (labelOpacity === value) return;
     labelOpacity = value;
     for (const node of [leaderLayer, labelLayer]) node.style.opacity = value;
@@ -170,7 +166,7 @@
     elapsed += delta;
     if (before < INTRO_END) reveal();
     if (before < LABEL_END) revealLabels();
-    // Planet lighting, motion and path drawing share one start time.
+    // The planets begin moving as they fade into the partially drawn atlas.
     const motionDelta = Math.max(0, elapsed - RUN_AT) - Math.max(0, before - RUN_AT);
     if (motionDelta > 0) render(motionDelta);
     setMotion(elapsed >= RUN_AT ? 'running' : 'intro');

@@ -44,7 +44,7 @@ test('homepage navigation and metadata, with 3D assets deferred', async ({ page 
   expect(modelRequests).toEqual([]);
 });
 
-test('solar intro lights and moves planets with orbit drawing, without redundant intro writes', async ({ page }) => {
+test('solar atlas draws before planets, staggers paths and settles without redundant writes', async ({ page }) => {
   const clockStart = new Date('2026-10-21T00:00:00Z');
   await page.clock.install({ time: clockStart });
   await page.goto('/#projects');
@@ -59,28 +59,28 @@ test('solar intro lights and moves planets with orbit drawing, without redundant
   const initial = await planet.getAttribute('transform');
   await page.clock.runFor(400);
   await expect(page.locator('.solar-planets')).toHaveCSS('opacity', '0');
-  expect(await page.locator('.solar-orbit').evaluateAll(nodes => nodes.map(node => Number(node.style.strokeDashoffset)))).toEqual(Array(8).fill(.8));
+  const early = await page.locator('.solar-orbit').evaluateAll(nodes => nodes.map(node => Number(node.style.strokeDashoffset)));
+  expect(early[0]).toBeLessThan(1);
+  expect(early[0]).toBeGreaterThan(.9);
+  expect(early.at(-1)).toBe(1);
   expect(await planet.getAttribute('transform')).toBe(initial);
   await page.clock.runFor(200);
   const moving = await planet.getAttribute('transform');
   expect(moving).not.toBe(initial);
   const offset = Number(await orbit.evaluate(node => node.style.strokeDashoffset));
-  expect(offset).toBeGreaterThan(.7);
-  expect(offset).toBeLessThan(.8);
+  expect(offset).toBeGreaterThan(.8);
+  expect(offset).toBeLessThan(early[0]);
   const opacity = Number(await page.locator('.solar-planets').evaluate(node => node.style.opacity));
   expect(opacity).toBeGreaterThan(0);
   expect(opacity).toBeLessThan(1);
-  expect(opacity).toBeCloseTo((1 - offset / .8) * (1.5 / .3), 3);
   await expect(page.locator('#projects')).toHaveAttribute('data-motion', 'running');
-  await page.clock.runFor(1300);
+  await page.clock.runFor(2000);
   await expect(page.locator('.solar-planets')).toHaveCSS('opacity', '1');
   const remaining = await page.locator('.solar-orbit').evaluateAll(nodes => nodes.map(node => Number(node.style.strokeDashoffset)));
-  for (const offset of remaining) {
-    expect(offset).toBeGreaterThan(.04);
-    expect(offset).toBeLessThan(.1);
-    expect(offset).toBe(remaining[0]);
-  }
-  await page.clock.runFor(200);
+  expect(remaining[0]).toBe(0);
+  expect(remaining.at(-1)).toBeGreaterThan(0);
+  for (let i = 1; i < remaining.length; i++) expect(remaining[i]).toBeGreaterThanOrEqual(remaining[i - 1]);
+  await page.clock.runFor(400);
   await expect(orbit).toHaveCSS('stroke-dashoffset', '0px');
   expect(await planet.getAttribute('transform')).not.toBe(moving);
   await page.clock.runFor(800);
@@ -96,7 +96,7 @@ test('solar intro lights and moves planets with orbit drawing, without redundant
   expect(await page.evaluate(() => window.solarIntroWrites)).toBe(0);
 });
 
-test('solar annotations wait for paths, pulse once, pause and reset with the artwork', async ({ page }) => {
+test('solar annotations fade in after paths, pause and reset with the artwork', async ({ page }) => {
   const start = new Date('2026-10-21T00:00:00Z');
   await page.clock.install({ time: start });
   await page.goto('/#projects');
@@ -114,10 +114,10 @@ test('solar annotations wait for paths, pulse once, pause and reset with the art
       && children.indexOf(svg.querySelector('.solar-annotations')) > children.indexOf(svg.querySelector('.solar-planets'));
   })).toBe(true);
   await expect(labels).toHaveCSS('pointer-events', 'none');
-  await page.clock.runFor(1900);
+  await page.clock.runFor(2800);
   await expect(labels).toHaveCSS('opacity', '0');
-  expect(Number(await page.locator('.solar-orbit').first().evaluate(node => node.style.strokeDashoffset))).toBeGreaterThan(0);
-  await page.clock.runFor(280);
+  expect(Number(await page.locator('.solar-orbit').last().evaluate(node => node.style.strokeDashoffset))).toBeGreaterThan(0);
+  await page.clock.runFor(400);
   await expect(page.locator('.solar-orbit').first()).toHaveCSS('stroke-dashoffset', '0px');
   const partial = await labels.getAttribute('style');
   const position = await labels.locator('.solar-annotation').first().getAttribute('transform');
@@ -136,13 +136,13 @@ test('solar annotations wait for paths, pulse once, pause and reset with the art
     await page.clock.runFor(16);
     opacity.push(Number(await labels.evaluate(node => node.style.opacity)));
   }
-  expect(opacity.some((value, i) => i > 0 && value < opacity[i - 1] - .01)).toBe(true);
+  expect(opacity.every((value, i) => i === 0 || value >= opacity[i - 1])).toBe(true);
   await expect(labels).toHaveCSS('opacity', '1');
   await expect(page.locator('.solar-annotation-leaders')).toHaveCSS('opacity', '1');
   await page.evaluate(() => document.getElementById('projects').classList.remove('enter'));
   await expect(labels).toHaveCSS('opacity', '0');
   await page.evaluate(() => document.getElementById('projects').classList.add('enter'));
-  await page.clock.runFor(1900);
+  await page.clock.runFor(2800);
   await expect(labels).toHaveCSS('opacity', '0');
   await page.clock.runFor(1000);
   await expect(labels).toHaveCSS('opacity', '1');
