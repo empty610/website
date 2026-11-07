@@ -6,8 +6,9 @@
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const sun = [...chart.querySelectorAll('.solar-sun, .solar-sun-aura')];
   const planetLayer = chart.querySelector('.solar-planets');
-  const PLANETS_AT = .5, ORBITS_AT = PLANETS_AT, OUTER_ORBIT_DURATION = 3;
-  const RUN_AT = ORBITS_AT, INTRO_END = ORBITS_AT + OUTER_ORBIT_DURATION;
+  const orbits = [...chart.querySelectorAll('.solar-orbit')];
+  const PLANETS_AT = .5, ORBITS_AT = PLANETS_AT, ORBITS_DURATION = 1.5;
+  const RUN_AT = ORBITS_AT, INTRO_END = ORBITS_AT + ORBITS_DURATION;
   const LABEL_DURATION = .72, LABEL_END = INTRO_END + LABEL_DURATION;
   const planets = [...section.querySelectorAll('[data-orbit]')].map(node => ({
     node,
@@ -50,25 +51,6 @@
   let entered = section.classList.contains('enter');
   const tilt = -24 * Math.PI / 180, cos = Math.cos(tilt), sin = Math.sin(tilt);
   const flattening = .49, depth = Math.sqrt(1 - flattening * flattening);
-  // Start each closed orbit at its planet's entry position. Two half-ellipse
-  // arcs preserve the atlas geometry and draw in the direction of revolution.
-  const orbits = planets.map(planet => {
-    const ellipse = chart.querySelector('.solar-orbit[rx="' + planet.radius + '"]');
-    const path = document.createElementNS(svg.namespaceURI, 'path');
-    const rx = planet.radius, ry = rx * flattening;
-    const x = rx * Math.cos(planet.angle), y = ry * Math.sin(planet.angle);
-    const start = (450 + x) + ' ' + (350 + y);
-    const opposite = (450 - x) + ' ' + (350 - y);
-    for (const name of ['class', 'pathLength', 'transform']) {
-      path.setAttribute(name, ellipse.getAttribute(name));
-    }
-    path.setAttribute('d', 'M ' + start + ' A ' + rx + ' ' + ry + ' 0 0 1 ' + opposite
-      + ' A ' + rx + ' ' + ry + ' 0 0 1 ' + start + ' Z');
-    ellipse.replaceWith(path);
-    return { node: path, length: path.getTotalLength() };
-  });
-  // One distance per second for all paths; the longest keeps the entry cadence.
-  const ORBIT_DRAW_SPEED = Math.max(...orbits.map(orbit => orbit.length)) / OUTER_ORBIT_DURATION;
   function render(delta) {
     for (const planet of planets) {
       planet.angle = (planet.angle + delta * planet.speed) % (Math.PI * 2);
@@ -153,8 +135,7 @@
     const time = reduced.matches ? INTRO_END : elapsed;
     for (const node of sun) node.style.opacity = clamp(time / .3);
     planetLayer.style.opacity = clamp((time - PLANETS_AT) / .3);
-    const drawn = Math.max(0, time - ORBITS_AT) * ORBIT_DRAW_SPEED;
-    for (const orbit of orbits) orbit.node.style.strokeDashoffset = 1 - clamp(drawn / orbit.length);
+    for (const orbit of orbits) orbit.style.strokeDashoffset = 1 - clamp((time - ORBITS_AT) / ORBITS_DURATION);
   }
   function revealLabels() {
     const time = reduced.matches ? LABEL_DURATION : elapsed - INTRO_END;
