@@ -4,14 +4,7 @@
   const chart = document.getElementById('solar-orbital-art');
   if (!section || !chart) return;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  const sun = [...chart.querySelectorAll('.solar-sun, .solar-sun-aura')];
   const planetLayer = chart.querySelector('.solar-planets');
-  const orbits = [...chart.querySelectorAll('.solar-orbit')];
-  // Draw each fixed orbit from its left side with one advancing endpoint.
-  const INTRO_END = 2.2, RUN_AT = 0, RUN_RAMP = .5;
-  const ARC_AT = .06, ARC_DURATION = 1.56, ARC_STAGGER = .025;
-  const LEADERS_AT = 1.18, LEADERS_DURATION = .42;
-  const LABELS_AT = 1.32, LABEL_DURATION = .55, LABEL_END = LABELS_AT + LABEL_DURATION;
   const planets = [...section.querySelectorAll('[data-orbit]')].map(node => ({
     node,
     radius: Number(node.dataset.radius),
@@ -43,12 +36,12 @@
     planet.labelMount = layer('solar-annotation');
     planet.leaderMount = layer('solar-annotation-leader');
     planet.labelMount.append(planet.label);
-    planet.leader.setAttribute('pathLength', '1');
     planet.leaderMount.append(planet.leader);
     labelLayer.append(planet.labelMount);
     leaderLayer.append(planet.leaderMount);
     return planet;
   });
+  const SUN_RISE = .9;
   let visible = false, frame = 0, previous = null, elapsed = 0;
   let entered = section.classList.contains('enter');
   const tilt = -24 * Math.PI / 180, cos = Math.cos(tilt), sin = Math.sin(tilt);
@@ -133,46 +126,6 @@
       planet.leader.setAttribute('d', `M ${side * (planet.extent + 6)} 0 H ${side * (planet.extent + 18)} L ${side * (planet.extent + 28)} ${baseline + 7} H ${side * (planet.extent + 12 + width)}`);
     }
   }
-  const clamp = value => Math.max(0, Math.min(1, value));
-  const smooth = value => { const t = clamp(value); return t * t * (3 - 2 * t); };
-  const smoother = value => { const t = clamp(value); return t * t * t * (t * (6 * t - 15) + 10); };
-  // Avoid reapplying settled intro styles while the scene is still arriving.
-  function setStyle(node, name, value) {
-    const next = String(value);
-    if (node.style[name] !== next) node.style[name] = next;
-  }
-  // Integrate the velocity ramp so pause/resume and frame rate stay consistent.
-  function motionTime(time) {
-    const t = Math.max(0, time - RUN_AT);
-    const u = t / RUN_RAMP;
-    return t < RUN_RAMP ? RUN_RAMP * (u * u * u - .5 * u * u * u * u) : t - RUN_RAMP / 2;
-  }
-  function reveal() {
-    const time = reduced.matches ? INTRO_END : elapsed;
-    setStyle(svg, 'opacity', .6 + .4 * smooth(time / .5));
-    for (const node of sun) setStyle(node, 'opacity', .25 + .75 * smooth(time / .7));
-    setStyle(planetLayer, 'opacity', 1);
-    for (const planet of planets) setStyle(planet.node, 'opacity', .2 + .8 * smooth(time / .65));
-    for (const [index, node] of orbits.entries()) {
-      const progress = smoother((time - ARC_AT - index * ARC_STAGGER) / ARC_DURATION);
-      const arc = .06 + .94 * progress;
-      // A half-turn offset anchors the start at the left vertex. One dash grows
-      // around the fixed ellipse; the original SVG seam stays inside that dash.
-      setStyle(node, 'strokeDasharray', progress >= 1 ? 'none' : arc.toFixed(5) + ' ' + (1 - arc).toFixed(5));
-      setStyle(node, 'strokeDashoffset', progress >= 1 ? 0 : .5);
-      setStyle(node, 'opacity', .2 + .8 * smooth(time / .8));
-    }
-  }
-  function revealLabels() {
-    const time = reduced.matches ? LABEL_END : elapsed;
-    const leaderProgress = smooth((time - LEADERS_AT) / LEADERS_DURATION);
-    setStyle(leaderLayer, 'opacity', Number(leaderProgress.toFixed(3)));
-    for (const planet of annotations) {
-      setStyle(planet.leader, 'strokeDasharray', leaderProgress >= 1 ? 'none' : '1');
-      setStyle(planet.leader, 'strokeDashoffset', Number((1 - leaderProgress).toFixed(4)));
-    }
-    setStyle(labelLayer, 'opacity', Number(smooth((time - LABELS_AT) / LABEL_DURATION).toFixed(3)));
-  }
   function canRun() {
     return !reduced.matches && entered && visible && !document.hidden && !document.documentElement.classList.contains('dc-navigation-active');
   }
@@ -186,12 +139,9 @@
     previous = now;
     const before = elapsed;
     elapsed += delta;
-    if (before < INTRO_END) reveal();
-    if (before < LABEL_END) revealLabels();
-    // The drawing and orbital motion share active time, so both pause together.
-    const motionDelta = motionTime(elapsed) - motionTime(before);
+    const motionDelta = Math.max(0, elapsed - SUN_RISE) - Math.max(0, before - SUN_RISE);
     if (motionDelta > 0) render(motionDelta);
-    setMotion(elapsed >= RUN_AT ? 'running' : 'intro');
+    setMotion(elapsed >= SUN_RISE ? 'running' : 'intro');
     frame = requestAnimationFrame(tick);
   }
   function update() {
@@ -203,9 +153,7 @@
     }
     entered = nextEntered;
     render(0);
-    reveal();
-    revealLabels();
-    setMotion(canRun() ? (elapsed >= RUN_AT ? 'running' : 'intro') : 'paused');
+    setMotion(canRun() ? (elapsed >= SUN_RISE ? 'running' : 'intro') : 'paused');
     if (canRun()) frame = requestAnimationFrame(tick);
   }
   new MutationObserver(update).observe(section, { attributes: true, attributeFilter: ['class'] });
