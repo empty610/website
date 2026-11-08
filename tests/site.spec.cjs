@@ -86,7 +86,7 @@ test('solar orbital plane unfolds with bodies on their tracks and settles cleanl
   await page.evaluate(() => {
     window.solarIntroWrites = 0;
     const observer = new MutationObserver(records => { window.solarIntroWrites += records.length; });
-    for (const node of document.querySelectorAll('.solar-orrery, .solar-sun, .solar-sun-aura, .solar-planets, .solar-planet, .solar-annotations, .solar-annotation-leaders')) {
+    for (const node of document.querySelectorAll('.solar-orrery, .solar-sun, .solar-sun-aura, .solar-planets, .solar-planet, .solar-annotations, .solar-annotation-leaders, .solar-leader')) {
       observer.observe(node, { attributes: true, attributeFilter: ['style'] });
     }
     for (const node of document.querySelectorAll('.solar-orbit')) observer.observe(node, { attributes: true });
@@ -119,7 +119,7 @@ test('solar unfolding and annotations pause and replay together', async ({ page 
   await page.clock.runFor(1000);
   await expect(labels).toHaveCSS('opacity', '0');
   expect(Number(await page.locator('.solar-orbit').first().evaluate(node => node.style.strokeDashoffset))).toBeGreaterThan(0);
-  await page.clock.runFor(300);
+  await page.clock.runFor(450);
   expect(Number(await page.locator('.solar-orbit').first().getAttribute('rx'))).toBeLessThan(62);
   const partial = await labels.getAttribute('style');
   const sceneStyle = await page.locator('.solar-orrery').getAttribute('style');

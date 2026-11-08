@@ -11,7 +11,9 @@
     ry: node.getAttribute('ry'), transform: node.getAttribute('transform') }));
   // Open one shared orbital plane; bodies stay on their tracks throughout.
   const INTRO_END = 2.2, RUN_AT = 0, RUN_RAMP = .5;
-  const LABELS_AT = 1.15, LABEL_DURATION = .55, LABEL_END = LABELS_AT + LABEL_DURATION;
+  const ARC_AT = .06, ARC_DURATION = 1.56, ARC_STAGGER = .025;
+  const LEADERS_AT = 1.18, LEADERS_DURATION = .42;
+  const LABELS_AT = 1.32, LABEL_DURATION = .55, LABEL_END = LABELS_AT + LABEL_DURATION;
   const planets = [...section.querySelectorAll('[data-orbit]')].map(node => ({
     node,
     radius: Number(node.dataset.radius),
@@ -43,12 +45,12 @@
     planet.labelMount = layer('solar-annotation');
     planet.leaderMount = layer('solar-annotation-leader');
     planet.labelMount.append(planet.label);
+    planet.leader.setAttribute('pathLength', '1');
     planet.leaderMount.append(planet.leader);
     labelLayer.append(planet.labelMount);
     leaderLayer.append(planet.leaderMount);
     return planet;
   });
-  let labelOpacity;
   let visible = false, frame = 0, previous = null, elapsed = 0;
   let entered = section.classList.contains('enter');
   const tilt = -24 * Math.PI / 180, cos = Math.cos(tilt), sin = Math.sin(tilt);
@@ -137,6 +139,11 @@
   }
   const clamp = value => Math.max(0, Math.min(1, value));
   const smooth = value => { const t = clamp(value); return t * t * (3 - 2 * t); };
+  const smoother = value => { const t = clamp(value); return t * t * t * (t * (6 * t - 15) + 10); };
+  function setAttribute(node, name, value) {
+    const next = String(value);
+    if (node.getAttribute(name) !== next) node.setAttribute(name, next);
+  }
   // Avoid reapplying settled intro styles while the scene is still arriving.
   function setStyle(node, name, value) {
     const next = String(value);
@@ -145,26 +152,29 @@
   // Integrate the velocity ramp so pause/resume and frame rate stay consistent.
   function motionTime(time) {
     const t = Math.max(0, time - RUN_AT);
-    return t < RUN_RAMP ? t * t / (2 * RUN_RAMP) : t - RUN_RAMP / 2;
+    const u = t / RUN_RAMP;
+    return t < RUN_RAMP ? RUN_RAMP * (u * u * u - .5 * u * u * u * u) : t - RUN_RAMP / 2;
   }
   function orbitalPose() {
-    const progress = reduced.matches ? 1 : 1 - Math.pow(1 - clamp(elapsed / INTRO_END), 3);
+    const t = reduced.matches ? 1 : clamp(elapsed / INTRO_END);
+    // A gentle start, then a long deceleration with no snap or overshoot.
+    const progress = 1 - Math.pow(1 - t, 4) * (1 + 4 * t);
     return { scale: .78 + .22 * progress, flattening: .18 + (flattening - .18) * progress, tilt: -10 - 14 * progress };
   }
   function reveal() {
     const time = reduced.matches ? INTRO_END : elapsed;
     const pose = orbitalPose();
-    const progress = smooth((time - .05) / 1.7);
-    const arc = .12 + .88 * progress;
     setStyle(svg, 'opacity', .6 + .4 * smooth(time / .5));
     for (const node of sun) setStyle(node, 'opacity', .25 + .75 * smooth(time / .7));
     setStyle(planetLayer, 'opacity', 1);
     for (const planet of planets) setStyle(planet.node, 'opacity', .2 + .8 * smooth(time / .65));
-    for (const { node, rx, ry, transform } of orbitGeometry) {
+    for (const [index, { node, rx, ry, transform }] of orbitGeometry.entries()) {
+      const progress = smoother((time - ARC_AT - index * ARC_STAGGER) / ARC_DURATION);
+      const arc = .12 + .88 * progress;
       // Restore the exact static geometry once the opening finishes.
-      node.setAttribute('rx', time >= INTRO_END ? rx : (rx * pose.scale).toFixed(3));
-      node.setAttribute('ry', time >= INTRO_END ? ry : (rx * pose.scale * pose.flattening).toFixed(3));
-      node.setAttribute('transform', time >= INTRO_END ? transform : 'rotate(' + pose.tilt.toFixed(3) + ' 450 350)');
+      setAttribute(node, 'rx', time >= INTRO_END ? rx : (rx * pose.scale).toFixed(3));
+      setAttribute(node, 'ry', time >= INTRO_END ? ry : (rx * pose.scale * pose.flattening).toFixed(3));
+      setAttribute(node, 'transform', time >= INTRO_END ? transform : 'rotate(' + pose.tilt.toFixed(3) + ' 450 350)');
       // Opposing short arcs grow towards each other and quietly close the orbit.
       setStyle(node, 'strokeDasharray', progress >= 1 ? 'none' : (arc / 2).toFixed(5) + ' ' + ((1 - arc) / 2).toFixed(5));
       setStyle(node, 'strokeDashoffset', progress >= 1 ? 0 : (arc / 4).toFixed(5));
@@ -172,11 +182,14 @@
     }
   }
   function revealLabels() {
-    const time = reduced.matches ? LABEL_DURATION : elapsed - LABELS_AT;
-    const value = smooth(time / LABEL_DURATION).toFixed(3);
-    if (labelOpacity === value) return;
-    labelOpacity = value;
-    for (const node of [leaderLayer, labelLayer]) node.style.opacity = value;
+    const time = reduced.matches ? LABEL_END : elapsed;
+    const leaderProgress = smooth((time - LEADERS_AT) / LEADERS_DURATION);
+    setStyle(leaderLayer, 'opacity', Number(leaderProgress.toFixed(3)));
+    for (const planet of annotations) {
+      setStyle(planet.leader, 'strokeDasharray', leaderProgress >= 1 ? 'none' : '1');
+      setStyle(planet.leader, 'strokeDashoffset', Number((1 - leaderProgress).toFixed(4)));
+    }
+    setStyle(labelLayer, 'opacity', Number(smooth((time - LABELS_AT) / LABEL_DURATION).toFixed(3)));
   }
   function canRun() {
     return !reduced.matches && entered && visible && !document.hidden && !document.documentElement.classList.contains('dc-navigation-active');
@@ -205,7 +218,6 @@
     if (entered && !nextEntered) {
       elapsed = 0;
       for (const planet of planets) planet.angle = Number(planet.node.dataset.angle) * Math.PI / 180;
-      render(0);
     }
     entered = nextEntered;
     render(0);

@@ -89,7 +89,7 @@
 .solar-map-guides { fill: none; stroke: #cebd9521; stroke-width: .75; }
 .solar-map-guides > path:first-child { stroke-dasharray: 2 7; }
 .solar-map-guides > circle { stroke-dasharray: 1 6; }
-.solar-orbit { fill: none; stroke: #c5b48d48; stroke-width: .8; }
+.solar-orbit { fill: none; stroke: #c5b48d48; stroke-width: .8; stroke-linecap: round; }
 .solar-orbit:nth-child(2n) { stroke: #c5b48d6b; }
 .solar-sun text { fill: #b8a786; font: 8px Consolas, monospace; text-anchor: middle; letter-spacing: 2px; }
 .solar-leader { fill: none; stroke: #b4a58866; stroke-width: .7; }
@@ -113,6 +113,7 @@
 .js .solar-planets { opacity: 1; }
 .js .solar-orbit { stroke-dasharray: .06 .44; stroke-dashoffset: .03; opacity: .2; }
 .js .solar-planet { opacity: .2; }
+.js .solar-leader { stroke-dasharray: 1; stroke-dashoffset: 1; }
 .js .solar-annotations, .js .solar-annotation-leaders,
 .js .solar-planets .solar-planet-label, .js .solar-planets .solar-leader { opacity: 0; }
 @keyframes solar-atlas-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
@@ -159,6 +160,7 @@
   .js .solar-orrery { opacity: 1; transform: none; }
   .solar-preview.enter #solar-title, .solar-preview.enter .solar-preview-copy > *, .solar-preview.enter .solar-preview-top, .solar-preview.enter .solar-preview-caption { animation: none; opacity: 1; transform: none; }
   .js .solar-planet { opacity: 1; }
+  .js .solar-leader { stroke-dasharray: none; stroke-dashoffset: 0; }
   .js .solar-preview .solar-preview-copy > *, .js .solar-preview-stage, .js .solar-preview-top, .js .solar-preview-caption { opacity: 1; animation: none; transform: none; }
   .js .solar-orbit { stroke-dasharray: none; stroke-dashoffset: 0; opacity: 1; transition: none; }
   .js .solar-sun, .js .solar-sun-aura, .js .solar-planets { opacity: 1; }
