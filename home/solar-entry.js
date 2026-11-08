@@ -8,11 +8,11 @@
   const planetLayer = chart.querySelector('.solar-planets');
   const orbits = [...chart.querySelectorAll('.solar-orbit')];
   // Let the atlas assemble: sunlight, inner-to-outer paths, then annotations.
-  const ORBITS_AT = .08, ORBITS_DURATION = 2.4, ORBIT_STAGGER = .055;
-  const PLANETS_AT = .55, PLANETS_DURATION = .6, PLANET_STAGGER = .06;
-  const RUN_AT = PLANETS_AT, RUN_RAMP = .8, ORBITS_PRE_DRAWN = .14;
+  const ORBITS_AT = .06, ORBITS_DURATION = 2, ORBIT_STAGGER = .045;
+  const PLANETS_AT = .45, PLANETS_DURATION = .5, PLANET_STAGGER = .05;
+  const RUN_AT = PLANETS_AT, RUN_RAMP = .65, ORBITS_PRE_DRAWN = .14;
   const INTRO_END = ORBITS_AT + ORBITS_DURATION + (orbits.length - 1) * ORBIT_STAGGER;
-  const LABELS_AT = INTRO_END + .12, LABEL_DURATION = .65, LABEL_END = LABELS_AT + LABEL_DURATION;
+  const LABELS_AT = INTRO_END + .1, LABEL_DURATION = .5, LABEL_END = LABELS_AT + LABEL_DURATION;
   const planets = [...section.querySelectorAll('[data-orbit]')].map(node => ({
     node,
     radius: Number(node.dataset.radius),
@@ -147,7 +147,7 @@
   }
   function reveal() {
     const time = reduced.matches ? INTRO_END : elapsed;
-    for (const node of sun) setStyle(node, 'opacity', smooth(time / .65));
+    for (const node of sun) setStyle(node, 'opacity', smooth(time / .5));
     setStyle(planetLayer, 'opacity', 1);
     for (const [index, planet] of planets.entries()) {
       setStyle(planet.node, 'opacity', smooth((time - PLANETS_AT - index * PLANET_STAGGER) / PLANETS_DURATION));
@@ -155,7 +155,7 @@
     for (const [index, orbit] of orbits.entries()) {
       const progress = smooth((time - ORBITS_AT - index * ORBIT_STAGGER) / ORBITS_DURATION);
       setStyle(orbit, 'strokeDashoffset', (1 - ORBITS_PRE_DRAWN) * (1 - progress));
-      setStyle(orbit, 'opacity', .2 + .8 * smooth(time / .6));
+      setStyle(orbit, 'opacity', .2 + .8 * smooth(time / .5));
     }
   }
   function revealLabels() {

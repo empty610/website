@@ -57,7 +57,7 @@ test('solar atlas pre-draws paths, reveals planets in order and settles without 
   const orbit = page.locator('.solar-orbit').first();
   const planet = page.locator('.solar-planet').first();
   const initial = await planet.getAttribute('transform');
-  await page.clock.runFor(400);
+  await page.clock.runFor(300);
   expect(await page.locator('.solar-planet').evaluateAll(nodes => nodes.every(node => Number(node.style.opacity) === 0))).toBe(true);
   const early = await page.locator('.solar-orbit').evaluateAll(nodes => nodes.map(node => Number(node.style.strokeDashoffset)));
   expect(early[0]).toBeLessThan(.86);
@@ -76,7 +76,7 @@ test('solar atlas pre-draws paths, reveals planets in order and settles without 
   expect(opacity).toBeLessThan(1);
   await expect(page.locator('.solar-planet').last()).toHaveCSS('opacity', '0');
   await expect(page.locator('#projects')).toHaveAttribute('data-motion', 'running');
-  await page.clock.runFor(1900);
+  await page.clock.runFor(1600);
   expect(await page.locator('.solar-planet').evaluateAll(nodes => nodes.every(node => Number(node.style.opacity) === 1))).toBe(true);
   const remaining = await page.locator('.solar-orbit').evaluateAll(nodes => nodes.map(node => Number(node.style.strokeDashoffset)));
   expect(remaining[0]).toBe(0);
@@ -116,7 +116,7 @@ test('solar annotations fade in after paths, pause and reset with the artwork', 
       && children.indexOf(svg.querySelector('.solar-annotations')) > children.indexOf(svg.querySelector('.solar-planets'));
   })).toBe(true);
   await expect(labels).toHaveCSS('pointer-events', 'none');
-  await page.clock.runFor(2800);
+  await page.clock.runFor(2300);
   await expect(labels).toHaveCSS('opacity', '0');
   expect(Number(await page.locator('.solar-orbit').last().evaluate(node => node.style.strokeDashoffset))).toBeGreaterThan(0);
   await page.clock.runFor(400);
@@ -144,7 +144,7 @@ test('solar annotations fade in after paths, pause and reset with the artwork', 
   await page.evaluate(() => document.getElementById('projects').classList.remove('enter'));
   await expect(labels).toHaveCSS('opacity', '0');
   await page.evaluate(() => document.getElementById('projects').classList.add('enter'));
-  await page.clock.runFor(2800);
+  await page.clock.runFor(2300);
   await expect(labels).toHaveCSS('opacity', '0');
   await page.clock.runFor(1000);
   await expect(labels).toHaveCSS('opacity', '1');
