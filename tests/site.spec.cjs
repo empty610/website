@@ -44,46 +44,31 @@ test('homepage navigation and metadata, with 3D assets deferred', async ({ page 
   expect(modelRequests).toEqual([]);
 });
 
-test('solar Sun rises alone before the original staggered entry and replays', async ({ page }) => {
+test('original solar entry fades in with staggered orbit drawing and replays', async ({ page }) => {
   await page.goto('/#projects');
+  const section = page.locator('#projects');
   const stage = page.locator('#solar-orbital-art');
   const orbits = page.locator('.solar-orbit');
-  const sun = page.locator('.solar-sun');
-  const planets = page.locator('.solar-planets');
   const planet = page.locator('.solar-planet').first();
-  await expect(page.locator('#projects')).toHaveClass(/enter/);
-  await expect(sun).toHaveCSS('animation-duration', '0.9s');
+  await expect(section).toHaveClass(/enter/);
+  await expect(stage).toHaveCSS('animation-name', 'solar-atlas-in');
+  await expect(stage).toHaveCSS('animation-duration', '1.5s');
   await expect(orbits.first()).toHaveCSS('transition-duration', '1.8s');
-  await expect(orbits.last()).toHaveCSS('transition-delay', '1.285s');
+  await expect(orbits.last()).toHaveCSS('transition-delay', '0.385s');
   await expect(orbits.last()).toHaveCSS('stroke-dashoffset', /^0(?:px)?$/);
+  await expect(page.locator('.solar-annotations')).toHaveCSS('opacity', '1');
   const position = await planet.getAttribute('transform');
   await expect.poll(() => planet.getAttribute('transform')).not.toBe(position);
   await page.evaluate(() => document.getElementById('projects').classList.remove('enter'));
   await expect(orbits.last()).toHaveCSS('stroke-dashoffset', /^1(?:px)?$/);
-  await expect(sun).toHaveCSS('opacity', '0');
-  const rising = await page.evaluate(async () => {
-    const planet = document.querySelector('.solar-planet');
-    const initial = planet.getAttribute('transform');
-    document.getElementById('projects').classList.add('enter');
-    await new Promise(resolve => setTimeout(resolve, 400));
-    return { sun: Number(getComputedStyle(document.querySelector('.solar-sun')).opacity),
-      planets: Number(getComputedStyle(document.querySelector('.solar-planets')).opacity),
-      orbit: parseFloat(getComputedStyle(document.querySelector('.solar-orbit')).strokeDashoffset),
-      still: planet.getAttribute('transform') === initial };
-  });
-  expect(rising.sun).toBeGreaterThan(0);
-  expect(rising.planets).toBe(0);
-  expect(rising.orbit).toBe(1);
-  expect(rising.still).toBe(true);
-  await expect(sun).toHaveCSS('opacity', '1');
-  await expect(planets).toHaveCSS('opacity', '1');
+  await expect(stage).toHaveCSS('opacity', '0');
+  await page.evaluate(() => document.getElementById('projects').classList.add('enter'));
+  await expect(stage).toHaveCSS('opacity', '1');
   await expect(orbits.last()).toHaveCSS('stroke-dashoffset', /^0(?:px)?$/);
   await expect(page.locator('.solar-annotations')).toHaveCount(1);
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await expect(sun).toHaveCSS('animation-name', 'none');
-  await expect(planets).toHaveCSS('animation-name', 'none');
-  await expect(planets).toHaveCSS('opacity', '1');
-  await expect(stage).toHaveCSS('opacity', '1');
+  await expect(stage).toHaveCSS('animation-name', 'none');
+  await expect(orbits.last()).toHaveCSS('stroke-dashoffset', /^0(?:px)?$/);
   await expect(orbits.last()).toHaveCSS('transition-duration', '0s');
   const frozen = await planet.getAttribute('transform');
   await page.waitForTimeout(150);
@@ -102,15 +87,16 @@ test('solar orbit drawing resets immediately on exit and survives rapid re-entry
     expect(reset, 'all eight tracks reset on exit ' + attempt).toEqual(Array(8).fill(1));
     await section.evaluate(node => node.scrollIntoView({ behavior: 'instant', block: 'start' }));
     await expect(section).toHaveClass(/enter/);
-    const rising = await page.evaluate(async () => {
+    const drawing = await page.evaluate(async () => {
       await new Promise(resolve => setTimeout(resolve, 400));
       return { offsets: [...document.querySelectorAll('.solar-orbit')].map(node => parseFloat(getComputedStyle(node).strokeDashoffset)),
-        opacity: Number(getComputedStyle(document.querySelector('.solar-planets')).opacity) };
+        opacity: Number(getComputedStyle(document.querySelector('.solar-preview-stage')).opacity) };
     });
-    expect(rising.offsets, 'no leftover lines during the Sun rise ' + attempt).toEqual(Array(8).fill(1));
-    expect(rising.opacity).toBe(0);
+    expect(drawing.offsets[0], 'a fresh draw is in progress ' + attempt).toBeGreaterThan(0);
+    expect(drawing.offsets[0]).toBeLessThan(1);
+    expect(drawing.offsets[7]).toBeGreaterThan(drawing.offsets[0]);
+    expect(drawing.opacity).toBeGreaterThan(0);
     // Leave during the next draw, not just after an already settled intro.
-    await page.waitForTimeout(1100);
     expect(await orbits.first().evaluate(node => parseFloat(getComputedStyle(node).strokeDashoffset))).toBeLessThan(1);
   }
   await expect(orbits.last()).toHaveCSS('stroke-dashoffset', /^0(?:px)?$/);

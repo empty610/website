@@ -41,8 +41,7 @@
     leaderLayer.append(planet.leaderMount);
     return planet;
   });
-  const SUN_RISE = .9;
-  let visible = false, frame = 0, previous = null, elapsed = 0;
+  let visible = false, frame = 0, previous = null;
   let entered = section.classList.contains('enter');
   const tilt = -24 * Math.PI / 180, cos = Math.cos(tilt), sin = Math.sin(tilt);
   const flattening = .49;
@@ -137,23 +136,19 @@
     if (!canRun()) return;
     const delta = previous === null ? 0 : Math.min((now - previous) / 1000, .1);
     previous = now;
-    const before = elapsed;
-    elapsed += delta;
-    const motionDelta = Math.max(0, elapsed - SUN_RISE) - Math.max(0, before - SUN_RISE);
-    if (motionDelta > 0) render(motionDelta);
-    setMotion(elapsed >= SUN_RISE ? 'running' : 'intro');
+    render(delta);
+    setMotion('running');
     frame = requestAnimationFrame(tick);
   }
   function update() {
     cancelAnimationFrame(frame); frame = 0; previous = null;
     const nextEntered = section.classList.contains('enter');
     if (entered && !nextEntered) {
-      elapsed = 0;
       for (const planet of planets) planet.angle = Number(planet.node.dataset.angle) * Math.PI / 180;
     }
     entered = nextEntered;
     render(0);
-    setMotion(canRun() ? (elapsed >= SUN_RISE ? 'running' : 'intro') : 'paused');
+    setMotion(canRun() ? 'running' : 'paused');
     if (canRun()) frame = requestAnimationFrame(tick);
   }
   new MutationObserver(update).observe(section, { attributes: true, attributeFilter: ['class'] });

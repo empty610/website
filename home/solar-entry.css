@@ -104,19 +104,11 @@
 .solar-preview.enter .solar-chinese-title { animation: solar-atlas-in 1s .18s both; }
 .solar-preview.enter .solar-preview-description { animation: solar-atlas-in 1s .25s both; }
 .solar-preview.enter .solar-entry-action { animation: solar-atlas-in 1s .32s both; }
-.solar-preview.enter .solar-preview-stage { opacity: 1; }
-/* The Sun rises alone for .9s, then the original staggered atlas arrives. */
-.js .solar-sun, .js .solar-sun-aura,
-.js .solar-orrery > g:where(:not(.solar-sun):not(.solar-orbits)), .js .solar-map-scale, .js .solar-map-heading { opacity: 0; }
-.solar-preview.enter .solar-sun, .solar-preview.enter .solar-sun-aura { animation: solar-sun-rise .9s cubic-bezier(.22, 1, .36, 1) both; }
-.solar-preview.enter .solar-orrery > g:where(:not(.solar-sun):not(.solar-orbits)),
-.solar-preview.enter .solar-map-scale, .solar-preview.enter .solar-map-heading { animation: solar-detail-in 1.5s .9s both; }
+.solar-preview.enter .solar-preview-stage { animation: solar-atlas-in 1.5s .2s both; }
 .solar-preview.enter .solar-preview-caption { animation: solar-atlas-in 1s .45s both; }
 /* Only entry draws a transition; exit clears every track immediately. */
 .js .solar-orbit { stroke-dasharray: 1; stroke-dashoffset: 1; }
-.solar-preview.enter .solar-orbit { stroke-dashoffset: 0; transition: stroke-dashoffset 1.8s cubic-bezier(.22, 1, .36, 1); transition-delay: calc(.9s + var(--orbit-delay)); }
-@keyframes solar-sun-rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes solar-detail-in { from { opacity: 0; } to { opacity: 1; } }
+.solar-preview.enter .solar-orbit { stroke-dashoffset: 0; transition: stroke-dashoffset 1.8s cubic-bezier(.22, 1, .36, 1); transition-delay: var(--orbit-delay); }
 @keyframes solar-atlas-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 @media (min-width: 1600px) { .solar-preview-stage { width: min(100% + 4vw, 860px); margin-left: -2vw; } }
 @media (max-width: 1050px) and (min-width: 701px) {
