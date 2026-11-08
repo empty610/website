@@ -7,10 +7,11 @@
   const sun = [...chart.querySelectorAll('.solar-sun, .solar-sun-aura')];
   const planetLayer = chart.querySelector('.solar-planets');
   const orbits = [...chart.querySelectorAll('.solar-orbit')];
-  // Reveal the atlas as one scene, with a single travelling light accent.
-  const INTRO_END = 2.45, WAVE_AT = .15, WAVE_DURATION = 1.8;
-  const RUN_AT = 0, RUN_RAMP = .75;
-  const LABELS_AT = 1.1, LABEL_DURATION = .65, LABEL_END = LABELS_AT + LABEL_DURATION;
+  const orbitGeometry = orbits.map(node => ({ node, rx: Number(node.getAttribute('rx')),
+    ry: node.getAttribute('ry'), transform: node.getAttribute('transform') }));
+  // Open one shared orbital plane; bodies stay on their tracks throughout.
+  const INTRO_END = 2.2, RUN_AT = 0, RUN_RAMP = .5;
+  const LABELS_AT = 1.15, LABEL_DURATION = .55, LABEL_END = LABELS_AT + LABEL_DURATION;
   const planets = [...section.querySelectorAll('[data-orbit]')].map(node => ({
     node,
     radius: Number(node.dataset.radius),
@@ -47,37 +48,20 @@
     leaderLayer.append(planet.leaderMount);
     return planet;
   });
-  // The accent only duplicates the thin orbits, avoiding a full-scene filter.
-  const sweep = document.createElementNS(svg.namespaceURI, 'linearGradient');
-  sweep.id = 'solar-entry-sweep';
-  for (const [name, value] of Object.entries({ gradientUnits: 'userSpaceOnUse', x1: -180, y1: 0, x2: 180, y2: 0 })) sweep.setAttribute(name, value);
-  for (const [offset, opacity] of [[0, 0], [.5, .85], [1, 0]]) {
-    const stop = document.createElementNS(svg.namespaceURI, 'stop');
-    stop.setAttribute('offset', offset);
-    stop.setAttribute('stop-color', '#f0d5a1');
-    stop.setAttribute('stop-opacity', opacity);
-    sweep.append(stop);
-  }
-  svg.querySelector('defs').append(sweep);
-  const wave = layer('solar-intro-wave');
-  wave.setAttribute('aria-hidden', 'true');
-  for (const orbit of orbits) {
-    const accent = orbit.cloneNode(false);
-    accent.setAttribute('class', 'solar-wave-orbit');
-    wave.append(accent);
-  }
-  svg.querySelector('.solar-orbits').after(wave);
   let labelOpacity;
   let visible = false, frame = 0, previous = null, elapsed = 0;
   let entered = section.classList.contains('enter');
   const tilt = -24 * Math.PI / 180, cos = Math.cos(tilt), sin = Math.sin(tilt);
-  const flattening = .49, depth = Math.sqrt(1 - flattening * flattening);
+  const flattening = .49;
   function render(delta) {
+    const pose = orbitalPose();
+    const viewCos = Math.cos(pose.tilt * Math.PI / 180), viewSin = Math.sin(pose.tilt * Math.PI / 180);
+    const depth = Math.sqrt(1 - pose.flattening * pose.flattening);
     for (const planet of planets) {
       planet.angle = (planet.angle + delta * planet.speed) % (Math.PI * 2);
-      const x = planet.radius * Math.cos(planet.angle);
-      const y = planet.radius * flattening * Math.sin(planet.angle);
-      const px = x * cos - y * sin, py = x * sin + y * cos;
+      const x = planet.radius * pose.scale * Math.cos(planet.angle);
+      const y = planet.radius * pose.scale * pose.flattening * Math.sin(planet.angle);
+      const px = x * viewCos - y * viewSin, py = x * viewSin + y * viewCos;
       planet.x = 450 + px;
       planet.y = 350 + py;
       planet.extent = planet.ring ? 30 : planet.size;
@@ -163,27 +147,29 @@
     const t = Math.max(0, time - RUN_AT);
     return t < RUN_RAMP ? t * t / (2 * RUN_RAMP) : t - RUN_RAMP / 2;
   }
+  function orbitalPose() {
+    const progress = reduced.matches ? 1 : 1 - Math.pow(1 - clamp(elapsed / INTRO_END), 3);
+    return { scale: .78 + .22 * progress, flattening: .18 + (flattening - .18) * progress, tilt: -10 - 14 * progress };
+  }
   function reveal() {
     const time = reduced.matches ? INTRO_END : elapsed;
-    const settle = 1 - Math.pow(1 - clamp(time / INTRO_END), 3);
-    const lightAt = x => WAVE_AT + (x + 180) / 1260 * WAVE_DURATION;
-    setStyle(svg, 'opacity', .45 + .55 * smooth(time / .65));
-    setStyle(svg, 'transform', time >= INTRO_END ? 'none'
-      : 'translateY(' + (10 * (1 - settle)).toFixed(3) + 'px) scale(' + (.96 + .04 * settle).toFixed(5) + ') rotate(' + (-(1 - settle)).toFixed(3) + 'deg)');
-    for (const node of sun) setStyle(node, 'opacity', .3 + .7 * smooth((time - lightAt(450) + .2) / .55));
+    const pose = orbitalPose();
+    const progress = smooth((time - .05) / 1.7);
+    const arc = .12 + .88 * progress;
+    setStyle(svg, 'opacity', .6 + .4 * smooth(time / .5));
+    for (const node of sun) setStyle(node, 'opacity', .25 + .75 * smooth(time / .7));
     setStyle(planetLayer, 'opacity', 1);
-    for (const planet of planets) {
-      setStyle(planet.node, 'opacity', .35 + .65 * smooth((time - lightAt(planet.x) + .2) / .55));
+    for (const planet of planets) setStyle(planet.node, 'opacity', .2 + .8 * smooth(time / .65));
+    for (const { node, rx, ry, transform } of orbitGeometry) {
+      // Restore the exact static geometry once the opening finishes.
+      node.setAttribute('rx', time >= INTRO_END ? rx : (rx * pose.scale).toFixed(3));
+      node.setAttribute('ry', time >= INTRO_END ? ry : (rx * pose.scale * pose.flattening).toFixed(3));
+      node.setAttribute('transform', time >= INTRO_END ? transform : 'rotate(' + pose.tilt.toFixed(3) + ' 450 350)');
+      // Opposing short arcs grow towards each other and quietly close the orbit.
+      setStyle(node, 'strokeDasharray', progress >= 1 ? 'none' : (arc / 2).toFixed(5) + ' ' + ((1 - arc) / 2).toFixed(5));
+      setStyle(node, 'strokeDashoffset', progress >= 1 ? 0 : (arc / 4).toFixed(5));
+      setStyle(node, 'opacity', .2 + .8 * smooth(time / .8));
     }
-    for (const orbit of orbits) {
-      setStyle(orbit, 'strokeDashoffset', 0);
-      setStyle(orbit, 'opacity', .35 + .65 * smooth(time / 1.2));
-    }
-    const waveProgress = clamp((time - WAVE_AT) / WAVE_DURATION);
-    const position = 'translate(' + (-180 + 1260 * waveProgress).toFixed(2) + ' 0)';
-    if (sweep.getAttribute('gradientTransform') !== position) sweep.setAttribute('gradientTransform', position);
-    const envelope = smooth((time - WAVE_AT) / .2) * (1 - smooth((time - WAVE_AT - WAVE_DURATION + .25) / .25));
-    setStyle(wave, 'opacity', reduced.matches ? 0 : envelope);
   }
   function revealLabels() {
     const time = reduced.matches ? LABEL_DURATION : elapsed - LABELS_AT;
@@ -207,7 +193,7 @@
     elapsed += delta;
     if (before < INTRO_END) reveal();
     if (before < LABEL_END) revealLabels();
-    // Motion ramps in with the whole scene, independently of the light sweep.
+    // The opening plane and orbital motion share active time, so both pause together.
     const motionDelta = motionTime(elapsed) - motionTime(before);
     if (motionDelta > 0) render(motionDelta);
     setMotion(elapsed >= RUN_AT ? 'running' : 'intro');
@@ -222,7 +208,7 @@
       render(0);
     }
     entered = nextEntered;
-    placeLabels();
+    render(0);
     reveal();
     revealLabels();
     setMotion(canRun() ? (elapsed >= RUN_AT ? 'running' : 'intro') : 'paused');

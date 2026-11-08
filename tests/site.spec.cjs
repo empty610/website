@@ -44,7 +44,7 @@ test('homepage navigation and metadata, with 3D assets deferred', async ({ page 
   expect(modelRequests).toEqual([]);
 });
 
-test('solar scene arrives together, sweeps once and settles without redundant writes', async ({ page }) => {
+test('solar orbital plane unfolds with bodies on their tracks and settles cleanly', async ({ page }) => {
   const clockStart = new Date('2026-11-08T00:00:00Z');
   await page.clock.install({ time: clockStart });
   await page.goto('/#projects');
@@ -52,38 +52,44 @@ test('solar scene arrives together, sweeps once and settles without redundant wr
   await page.clock.pauseAt(new Date(clockStart.getTime() + 60000));
   await page.evaluate(() => document.getElementById('projects').classList.remove('enter'));
   await page.evaluate(() => document.getElementById('projects').classList.add('enter'));
-  const scene = page.locator('.solar-orrery');
-  const wave = page.locator('.solar-intro-wave');
+  const orbit = page.locator('.solar-orbit').first();
   const planet = page.locator('.solar-planet').first();
   const initialPosition = await planet.getAttribute('transform');
-  const initialScene = await scene.getAttribute('style');
-  expect(await page.locator('.solar-orbit').evaluateAll(nodes => nodes.every(node => Number(node.style.strokeDashoffset) === 0))).toBe(true);
+  const initialRadius = Number(await orbit.getAttribute('rx'));
+  expect(initialRadius).toBeLessThan(62);
   expect(await page.locator('.solar-planet').evaluateAll(nodes => nodes.every(node => Number(node.style.opacity) > 0))).toBe(true);
-  expect(Number(await page.locator('.solar-sun').evaluate(node => node.style.opacity))).toBeGreaterThan(0);
-  await expect(wave).toHaveCSS('opacity', '0');
-  await page.clock.runFor(350);
-  expect(await scene.getAttribute('style')).not.toBe(initialScene);
+  for (const dt of [350, 300, 500]) {
+    await page.clock.runFor(dt);
+    const errors = await page.evaluate(() => {
+      const orbits = [...document.querySelectorAll('.solar-orbit')];
+      return [...document.querySelectorAll('.solar-planet')].map((node, i) => {
+        const point = new DOMPoint().matrixTransform(node.transform.baseVal.consolidate().matrix);
+        const orbit = orbits[i];
+        const local = point.matrixTransform(orbit.transform.baseVal.consolidate().matrix.inverse());
+        return Math.abs(((local.x - 450) / orbit.rx.baseVal.value) ** 2 + ((local.y - 350) / orbit.ry.baseVal.value) ** 2 - 1);
+      });
+    });
+    expect(Math.max(...errors)).toBeLessThan(.004);
+  }
+  expect(Number(await orbit.getAttribute('rx'))).toBeGreaterThan(initialRadius);
+  expect(Number(await orbit.getAttribute('rx'))).toBeLessThan(62);
   expect(await planet.getAttribute('transform')).not.toBe(initialPosition);
-  expect(Number(await wave.evaluate(node => node.style.opacity))).toBeGreaterThan(0);
-  const sweepPosition = await page.locator('#solar-entry-sweep').getAttribute('gradientTransform');
-  await page.clock.runFor(1000);
-  expect(await page.locator('#solar-entry-sweep').getAttribute('gradientTransform')).not.toBe(sweepPosition);
-  expect(Number(await wave.evaluate(node => node.style.opacity))).toBeGreaterThan(0);
+  expect(Number(await orbit.evaluate(node => node.style.strokeDashoffset))).toBeGreaterThan(0);
   await page.clock.runFor(1300);
-  await expect(scene).toHaveCSS('transform', 'none');
-  await expect(scene).toHaveCSS('opacity', '1');
-  await expect(wave).toHaveCSS('opacity', '0');
+  await expect(orbit).toHaveAttribute('rx', '62');
+  await expect(orbit).toHaveAttribute('ry', '30.38');
+  await expect(orbit).toHaveAttribute('transform', 'rotate(-24 450 350)');
+  await expect(orbit).toHaveCSS('stroke-dasharray', 'none');
   await expect(page.locator('.solar-annotations')).toHaveCSS('opacity', '1');
+  await expect(page.locator('.solar-intro-wave')).toHaveCount(0);
   expect(await page.locator('.solar-planet').evaluateAll(nodes => nodes.every(node => Number(node.style.opacity) === 1))).toBe(true);
-  await expect(page.locator('.solar-wave-orbit')).toHaveCount(8);
-  await expect(page.locator('#solar-entry-sweep')).toHaveCount(1);
   await page.evaluate(() => {
     window.solarIntroWrites = 0;
     const observer = new MutationObserver(records => { window.solarIntroWrites += records.length; });
-    for (const node of document.querySelectorAll('.solar-orrery, .solar-intro-wave, .solar-sun, .solar-sun-aura, .solar-planets, .solar-planet, .solar-orbit, .solar-annotations, .solar-annotation-leaders')) {
+    for (const node of document.querySelectorAll('.solar-orrery, .solar-sun, .solar-sun-aura, .solar-planets, .solar-planet, .solar-annotations, .solar-annotation-leaders')) {
       observer.observe(node, { attributes: true, attributeFilter: ['style'] });
     }
-    observer.observe(document.querySelector('#solar-entry-sweep'), { attributes: true });
+    for (const node of document.querySelectorAll('.solar-orbit')) observer.observe(node, { attributes: true });
     observer.observe(document.querySelector('#projects'), { attributes: true, attributeFilter: ['data-motion'] });
   });
   const settledPosition = await planet.getAttribute('transform');
@@ -92,7 +98,7 @@ test('solar scene arrives together, sweeps once and settles without redundant wr
   expect(await planet.getAttribute('transform')).not.toBe(settledPosition);
 });
 
-test('solar annotations overlap the sweep and pause and reset with the scene', async ({ page }) => {
+test('solar unfolding and annotations pause and replay together', async ({ page }) => {
   const start = new Date('2026-10-21T00:00:00Z');
   await page.clock.install({ time: start });
   await page.goto('/#projects');
@@ -112,12 +118,12 @@ test('solar annotations overlap the sweep and pause and reset with the scene', a
   await expect(labels).toHaveCSS('pointer-events', 'none');
   await page.clock.runFor(1000);
   await expect(labels).toHaveCSS('opacity', '0');
-  expect(Number(await page.locator('.solar-intro-wave').evaluate(node => node.style.opacity))).toBeGreaterThan(0);
+  expect(Number(await page.locator('.solar-orbit').first().evaluate(node => node.style.strokeDashoffset))).toBeGreaterThan(0);
   await page.clock.runFor(300);
-  await expect(page.locator('.solar-orbit').first()).toHaveCSS('stroke-dashoffset', '0px');
+  expect(Number(await page.locator('.solar-orbit').first().getAttribute('rx'))).toBeLessThan(62);
   const partial = await labels.getAttribute('style');
   const sceneStyle = await page.locator('.solar-orrery').getAttribute('style');
-  const sweepPosition = await page.locator('#solar-entry-sweep').getAttribute('gradientTransform');
+  const orbitPosition = await page.locator('.solar-orbit').first().getAttribute('transform');
   const position = await labels.locator('.solar-annotation').first().getAttribute('transform');
   expect(Number(await labels.evaluate(node => node.style.opacity))).toBeGreaterThan(0);
   expect(Number(await labels.evaluate(node => node.style.opacity))).toBeLessThan(1);
@@ -128,7 +134,7 @@ test('solar annotations overlap the sweep and pause and reset with the scene', a
   await page.clock.runFor(3000);
   expect(await labels.getAttribute('style')).toBe(partial);
   expect(await page.locator('.solar-orrery').getAttribute('style')).toBe(sceneStyle);
-  expect(await page.locator('#solar-entry-sweep').getAttribute('gradientTransform')).toBe(sweepPosition);
+  expect(await page.locator('.solar-orbit').first().getAttribute('transform')).toBe(orbitPosition);
   expect(await labels.locator('.solar-annotation').first().getAttribute('transform')).toBe(position);
   await page.evaluate(() => { delete document.hidden; document.dispatchEvent(new Event('visibilitychange')); });
   const opacity = [];
@@ -147,8 +153,16 @@ test('solar annotations overlap the sweep and pause and reset with the scene', a
   await page.clock.runFor(1000);
   await expect(labels).toHaveCSS('opacity', '1');
   await expect(page.locator('.solar-annotations')).toHaveCount(1);
-  await expect(page.locator('.solar-intro-wave')).toHaveCount(1);
-  await expect(page.locator('#solar-entry-sweep')).toHaveCount(1);
+  await page.evaluate(() => document.getElementById('projects').classList.remove('enter'));
+  await page.evaluate(() => document.getElementById('projects').classList.add('enter'));
+  await page.clock.runFor(300);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect(page.locator('.solar-orbit').first()).toHaveAttribute('rx', '62');
+  await expect(page.locator('.solar-orbit').first()).toHaveCSS('stroke-dasharray', 'none');
+  await expect(labels).toHaveCSS('opacity', '1');
+  const frozen = await page.locator('.solar-planet').first().getAttribute('transform');
+  await page.clock.runFor(300);
+  expect(await page.locator('.solar-planet').first().getAttribute('transform')).toBe(frozen);
 });
 
 test('solar annotation layers stay clear of planets, text and chart edges', async ({ page }) => {
