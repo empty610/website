@@ -44,7 +44,7 @@ test('homepage navigation and metadata, with 3D assets deferred', async ({ page 
   expect(modelRequests).toEqual([]);
 });
 
-test('solar orbital plane unfolds with bodies on their tracks and settles cleanly', async ({ page }) => {
+test('solar orbits draw from one fixed side with bodies on their tracks and settle cleanly', async ({ page }) => {
   const clockStart = new Date('2026-11-08T00:00:00Z');
   await page.clock.install({ time: clockStart });
   await page.goto('/#projects');
@@ -56,7 +56,8 @@ test('solar orbital plane unfolds with bodies on their tracks and settles cleanl
   const planet = page.locator('.solar-planet').first();
   const initialPosition = await planet.getAttribute('transform');
   const initialRadius = Number(await orbit.getAttribute('rx'));
-  expect(initialRadius).toBeLessThan(62);
+  expect(initialRadius).toBe(62);
+  let previousArc = .06;
   expect(await page.locator('.solar-planet').evaluateAll(nodes => nodes.every(node => Number(node.style.opacity) > 0))).toBe(true);
   for (const dt of [350, 300, 500]) {
     await page.clock.runFor(dt);
@@ -70,9 +71,20 @@ test('solar orbital plane unfolds with bodies on their tracks and settles cleanl
       });
     });
     expect(Math.max(...errors)).toBeLessThan(.004);
+    const drawing = await orbit.evaluate(node => ({
+      segments: node.style.strokeDasharray.split(/[ ,]+/).map(Number),
+      offset: Number(node.style.strokeDashoffset)
+    }));
+    expect(drawing.segments).toHaveLength(2);
+    expect(drawing.segments[0] + drawing.segments[1]).toBeCloseTo(1, 5);
+    expect(drawing.segments[0]).toBeGreaterThan(previousArc);
+    expect(drawing.offset).toBe(.5);
+    previousArc = drawing.segments[0];
+    await expect(orbit).toHaveAttribute('rx', '62');
+    await expect(orbit).toHaveAttribute('ry', '30.38');
+    await expect(orbit).toHaveAttribute('transform', 'rotate(-24 450 350)');
   }
-  expect(Number(await orbit.getAttribute('rx'))).toBeGreaterThan(initialRadius);
-  expect(Number(await orbit.getAttribute('rx'))).toBeLessThan(62);
+  expect(Number(await orbit.getAttribute('rx'))).toBe(initialRadius);
   expect(await planet.getAttribute('transform')).not.toBe(initialPosition);
   expect(Number(await orbit.evaluate(node => node.style.strokeDashoffset))).toBeGreaterThan(0);
   await page.clock.runFor(1300);
@@ -120,10 +132,10 @@ test('solar unfolding and annotations pause and replay together', async ({ page 
   await expect(labels).toHaveCSS('opacity', '0');
   expect(Number(await page.locator('.solar-orbit').first().evaluate(node => node.style.strokeDashoffset))).toBeGreaterThan(0);
   await page.clock.runFor(450);
-  expect(Number(await page.locator('.solar-orbit').first().getAttribute('rx'))).toBeLessThan(62);
+  expect(Number(await page.locator('.solar-orbit').first().getAttribute('rx'))).toBe(62);
   const partial = await labels.getAttribute('style');
   const sceneStyle = await page.locator('.solar-orrery').getAttribute('style');
-  const orbitPosition = await page.locator('.solar-orbit').first().getAttribute('transform');
+  const orbitStyle = await page.locator('.solar-orbit').first().getAttribute('style');
   const position = await labels.locator('.solar-annotation').first().getAttribute('transform');
   expect(Number(await labels.evaluate(node => node.style.opacity))).toBeGreaterThan(0);
   expect(Number(await labels.evaluate(node => node.style.opacity))).toBeLessThan(1);
@@ -134,7 +146,7 @@ test('solar unfolding and annotations pause and replay together', async ({ page 
   await page.clock.runFor(3000);
   expect(await labels.getAttribute('style')).toBe(partial);
   expect(await page.locator('.solar-orrery').getAttribute('style')).toBe(sceneStyle);
-  expect(await page.locator('.solar-orbit').first().getAttribute('transform')).toBe(orbitPosition);
+  expect(await page.locator('.solar-orbit').first().getAttribute('style')).toBe(orbitStyle);
   expect(await labels.locator('.solar-annotation').first().getAttribute('transform')).toBe(position);
   await page.evaluate(() => { delete document.hidden; document.dispatchEvent(new Event('visibilitychange')); });
   const opacity = [];

@@ -7,9 +7,7 @@
   const sun = [...chart.querySelectorAll('.solar-sun, .solar-sun-aura')];
   const planetLayer = chart.querySelector('.solar-planets');
   const orbits = [...chart.querySelectorAll('.solar-orbit')];
-  const orbitGeometry = orbits.map(node => ({ node, rx: Number(node.getAttribute('rx')),
-    ry: node.getAttribute('ry'), transform: node.getAttribute('transform') }));
-  // Open one shared orbital plane; bodies stay on their tracks throughout.
+  // Draw each fixed orbit from its left side with one advancing endpoint.
   const INTRO_END = 2.2, RUN_AT = 0, RUN_RAMP = .5;
   const ARC_AT = .06, ARC_DURATION = 1.56, ARC_STAGGER = .025;
   const LEADERS_AT = 1.18, LEADERS_DURATION = .42;
@@ -56,14 +54,12 @@
   const tilt = -24 * Math.PI / 180, cos = Math.cos(tilt), sin = Math.sin(tilt);
   const flattening = .49;
   function render(delta) {
-    const pose = orbitalPose();
-    const viewCos = Math.cos(pose.tilt * Math.PI / 180), viewSin = Math.sin(pose.tilt * Math.PI / 180);
-    const depth = Math.sqrt(1 - pose.flattening * pose.flattening);
+    const depth = Math.sqrt(1 - flattening * flattening);
     for (const planet of planets) {
       planet.angle = (planet.angle + delta * planet.speed) % (Math.PI * 2);
-      const x = planet.radius * pose.scale * Math.cos(planet.angle);
-      const y = planet.radius * pose.scale * pose.flattening * Math.sin(planet.angle);
-      const px = x * viewCos - y * viewSin, py = x * viewSin + y * viewCos;
+      const x = planet.radius * Math.cos(planet.angle);
+      const y = planet.radius * flattening * Math.sin(planet.angle);
+      const px = x * cos - y * sin, py = x * sin + y * cos;
       planet.x = 450 + px;
       planet.y = 350 + py;
       planet.extent = planet.ring ? 30 : planet.size;
@@ -140,10 +136,6 @@
   const clamp = value => Math.max(0, Math.min(1, value));
   const smooth = value => { const t = clamp(value); return t * t * (3 - 2 * t); };
   const smoother = value => { const t = clamp(value); return t * t * t * (t * (6 * t - 15) + 10); };
-  function setAttribute(node, name, value) {
-    const next = String(value);
-    if (node.getAttribute(name) !== next) node.setAttribute(name, next);
-  }
   // Avoid reapplying settled intro styles while the scene is still arriving.
   function setStyle(node, name, value) {
     const next = String(value);
@@ -155,29 +147,19 @@
     const u = t / RUN_RAMP;
     return t < RUN_RAMP ? RUN_RAMP * (u * u * u - .5 * u * u * u * u) : t - RUN_RAMP / 2;
   }
-  function orbitalPose() {
-    const t = reduced.matches ? 1 : clamp(elapsed / INTRO_END);
-    // A gentle start, then a long deceleration with no snap or overshoot.
-    const progress = 1 - Math.pow(1 - t, 4) * (1 + 4 * t);
-    return { scale: .78 + .22 * progress, flattening: .18 + (flattening - .18) * progress, tilt: -10 - 14 * progress };
-  }
   function reveal() {
     const time = reduced.matches ? INTRO_END : elapsed;
-    const pose = orbitalPose();
     setStyle(svg, 'opacity', .6 + .4 * smooth(time / .5));
     for (const node of sun) setStyle(node, 'opacity', .25 + .75 * smooth(time / .7));
     setStyle(planetLayer, 'opacity', 1);
     for (const planet of planets) setStyle(planet.node, 'opacity', .2 + .8 * smooth(time / .65));
-    for (const [index, { node, rx, ry, transform }] of orbitGeometry.entries()) {
+    for (const [index, node] of orbits.entries()) {
       const progress = smoother((time - ARC_AT - index * ARC_STAGGER) / ARC_DURATION);
-      const arc = .12 + .88 * progress;
-      // Restore the exact static geometry once the opening finishes.
-      setAttribute(node, 'rx', time >= INTRO_END ? rx : (rx * pose.scale).toFixed(3));
-      setAttribute(node, 'ry', time >= INTRO_END ? ry : (rx * pose.scale * pose.flattening).toFixed(3));
-      setAttribute(node, 'transform', time >= INTRO_END ? transform : 'rotate(' + pose.tilt.toFixed(3) + ' 450 350)');
-      // Opposing short arcs grow towards each other and quietly close the orbit.
-      setStyle(node, 'strokeDasharray', progress >= 1 ? 'none' : (arc / 2).toFixed(5) + ' ' + ((1 - arc) / 2).toFixed(5));
-      setStyle(node, 'strokeDashoffset', progress >= 1 ? 0 : (arc / 4).toFixed(5));
+      const arc = .06 + .94 * progress;
+      // A half-turn offset anchors the start at the left vertex. One dash grows
+      // around the fixed ellipse; the original SVG seam stays inside that dash.
+      setStyle(node, 'strokeDasharray', progress >= 1 ? 'none' : arc.toFixed(5) + ' ' + (1 - arc).toFixed(5));
+      setStyle(node, 'strokeDashoffset', progress >= 1 ? 0 : .5);
       setStyle(node, 'opacity', .2 + .8 * smooth(time / .8));
     }
   }
@@ -206,7 +188,7 @@
     elapsed += delta;
     if (before < INTRO_END) reveal();
     if (before < LABEL_END) revealLabels();
-    // The opening plane and orbital motion share active time, so both pause together.
+    // The drawing and orbital motion share active time, so both pause together.
     const motionDelta = motionTime(elapsed) - motionTime(before);
     if (motionDelta > 0) render(motionDelta);
     setMotion(elapsed >= RUN_AT ? 'running' : 'intro');

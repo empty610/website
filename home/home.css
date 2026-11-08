@@ -986,11 +986,11 @@ html:not(.js) .scroll-cue {
 .solar-preview.enter .solar-preview-stage { opacity: 1; }
 .solar-preview.enter .solar-map-heading { animation: solar-atlas-in 1s .2s both; }
 .solar-preview.enter .solar-preview-caption { animation: solar-atlas-in 1s .45s both; }
-/* One orbital plane opens while two opposing arcs complete each track. */
+/* One continuous arc grows from the left side of each fixed orbit. */
 .js .solar-orrery { opacity: .6; }
 .js .solar-sun, .js .solar-sun-aura { opacity: .25; }
 .js .solar-planets { opacity: 1; }
-.js .solar-orbit { stroke-dasharray: .06 .44; stroke-dashoffset: .03; opacity: .2; }
+.js .solar-orbit { stroke-dasharray: .06 .94; stroke-dashoffset: .5; opacity: .2; }
 .js .solar-planet { opacity: .2; }
 .js .solar-leader { stroke-dasharray: 1; stroke-dashoffset: 1; }
 .js .solar-annotations, .js .solar-annotation-leaders,
