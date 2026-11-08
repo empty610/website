@@ -112,8 +112,9 @@
 .solar-preview.enter .solar-orrery > g:where(:not(.solar-sun):not(.solar-orbits)),
 .solar-preview.enter .solar-map-scale, .solar-preview.enter .solar-map-heading { animation: solar-detail-in 1.5s .9s both; }
 .solar-preview.enter .solar-preview-caption { animation: solar-atlas-in 1s .45s both; }
-.js .solar-orbit { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.8s cubic-bezier(.22, 1, .36, 1); transition-delay: calc(.9s + var(--orbit-delay)); }
-.solar-preview.enter .solar-orbit { stroke-dashoffset: 0; }
+/* Only entry draws a transition; exit clears every track immediately. */
+.js .solar-orbit { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.solar-preview.enter .solar-orbit { stroke-dashoffset: 0; transition: stroke-dashoffset 1.8s cubic-bezier(.22, 1, .36, 1); transition-delay: calc(.9s + var(--orbit-delay)); }
 @keyframes solar-sun-rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes solar-detail-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes solar-atlas-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
@@ -164,7 +165,7 @@
   .js .solar-planet { opacity: 1; }
   .js .solar-leader { stroke-dasharray: none; stroke-dashoffset: 0; }
   .js .solar-preview .solar-preview-copy > *, .js .solar-preview-stage, .js .solar-preview-top, .js .solar-preview-caption { opacity: 1; animation: none; transform: none; }
-  .js .solar-orbit { stroke-dasharray: none; stroke-dashoffset: 0; opacity: 1; transition: none; }
+  .js .solar-preview .solar-orbit { stroke-dasharray: none; stroke-dashoffset: 0; opacity: 1; transition: none; }
   .js .solar-sun, .js .solar-sun-aura, .js .solar-planets { opacity: 1; }
   .js .solar-annotations, .js .solar-annotation-leaders,
   .js .solar-planets .solar-planet-label, .js .solar-planets .solar-leader { opacity: 1; }

@@ -90,6 +90,32 @@ test('solar Sun rises alone before the original staggered entry and replays', as
   expect(await planet.getAttribute('transform')).toBe(frozen);
 });
 
+test('solar orbit drawing resets immediately on exit and survives rapid re-entry', async ({ page }) => {
+  await page.goto('/#projects');
+  const section = page.locator('#projects');
+  const orbits = page.locator('.solar-orbit');
+  await expect(orbits.last()).toHaveCSS('stroke-dashoffset', /^0(?:px)?$/);
+  for (let attempt = 0; attempt < 3; attempt++) {
+    await page.locator('#dc').evaluate(node => node.scrollIntoView({ behavior: 'instant', block: 'start' }));
+    await expect(section).not.toHaveClass(/enter/);
+    const reset = await orbits.evaluateAll(nodes => nodes.map(node => parseFloat(getComputedStyle(node).strokeDashoffset)));
+    expect(reset, 'all eight tracks reset on exit ' + attempt).toEqual(Array(8).fill(1));
+    await section.evaluate(node => node.scrollIntoView({ behavior: 'instant', block: 'start' }));
+    await expect(section).toHaveClass(/enter/);
+    const rising = await page.evaluate(async () => {
+      await new Promise(resolve => setTimeout(resolve, 400));
+      return { offsets: [...document.querySelectorAll('.solar-orbit')].map(node => parseFloat(getComputedStyle(node).strokeDashoffset)),
+        opacity: Number(getComputedStyle(document.querySelector('.solar-planets')).opacity) };
+    });
+    expect(rising.offsets, 'no leftover lines during the Sun rise ' + attempt).toEqual(Array(8).fill(1));
+    expect(rising.opacity).toBe(0);
+    // Leave during the next draw, not just after an already settled intro.
+    await page.waitForTimeout(1100);
+    expect(await orbits.first().evaluate(node => parseFloat(getComputedStyle(node).strokeDashoffset))).toBeLessThan(1);
+  }
+  await expect(orbits.last()).toHaveCSS('stroke-dashoffset', /^0(?:px)?$/);
+});
+
 test('solar annotation layers stay clear of planets, text and chart edges', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   for (const [name, width, height] of [['desktop', 1366, 900], ['wide', 1920, 800], ['ultrawide', 2560, 800], ['mobile', 390, 844], ['landscape', 844, 390]]) {
