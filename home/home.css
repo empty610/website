@@ -964,7 +964,9 @@ html:not(.js) .scroll-cue {
 .solar-map-heading { margin: 0 22px; padding-bottom: 12px; border-bottom: 1px solid var(--solar-hairline); }
 .solar-map-heading > span:first-child { display: flex; gap: 9px; align-items: center; }
 .solar-map-heading i { width: 4px; height: 4px; border-radius: 50%; background: #b7c0a2; box-shadow: 0 0 0 3px #b7c0a20a; }
-.solar-orrery { display: block; width: 100%; height: auto; overflow: visible; }
+.solar-orrery { display: block; width: 100%; height: auto; overflow: visible; transform-origin: 50% 50%; }
+.solar-intro-wave { pointer-events: none; opacity: 0; }
+.solar-wave-orbit { fill: none; stroke: url(#solar-entry-sweep); stroke-width: 1.6; }
 .solar-map-guides { fill: none; stroke: #cebd9521; stroke-width: .75; }
 .solar-map-guides > path:first-child { stroke-dasharray: 2 7; }
 .solar-map-guides > circle { stroke-dasharray: 1 6; }
@@ -986,10 +988,12 @@ html:not(.js) .scroll-cue {
 .solar-preview.enter .solar-preview-stage { opacity: 1; }
 .solar-preview.enter .solar-map-heading { animation: solar-atlas-in 1s .2s both; }
 .solar-preview.enter .solar-preview-caption { animation: solar-atlas-in 1s .45s both; }
-/* A shared active-time clock assembles the atlas in overlapping stages. */
-.js .solar-sun, .js .solar-sun-aura, .js .solar-planets { opacity: 0; }
-.js .solar-orbit { stroke-dasharray: 1; stroke-dashoffset: .86; opacity: .2; }
-.js .solar-planet { opacity: 0; }
+/* One active-time clock settles the scene and carries a finite light sweep. */
+.js .solar-orrery { opacity: .45; transform: translateY(10px) scale(.96) rotate(-1deg); }
+.js .solar-sun, .js .solar-sun-aura { opacity: .3; }
+.js .solar-planets { opacity: 1; }
+.js .solar-orbit { stroke-dashoffset: 0; opacity: .35; }
+.js .solar-planet { opacity: .35; }
 .js .solar-annotations, .js .solar-annotation-leaders,
 .js .solar-planets .solar-planet-label, .js .solar-planets .solar-leader { opacity: 0; }
 @keyframes solar-atlas-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
@@ -1033,6 +1037,8 @@ html:not(.js) .scroll-cue {
   .solar-preview-caption { padding-top: 12px; min-height: 28px; }
 }
 @media (prefers-reduced-motion: reduce) {
+  .js .solar-orrery { opacity: 1; transform: none; }
+  .solar-intro-wave { display: none; }
   .solar-preview.enter #solar-title, .solar-preview.enter .solar-preview-copy > *, .solar-preview.enter .solar-preview-top, .solar-preview.enter .solar-preview-caption { animation: none; opacity: 1; transform: none; }
   .js .solar-planet { opacity: 1; }
   .js .solar-preview .solar-preview-copy > *, .js .solar-preview-stage, .js .solar-preview-top, .js .solar-preview-caption { opacity: 1; animation: none; transform: none; }
